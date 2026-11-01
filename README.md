@@ -10,7 +10,7 @@ Because it is my first year at Purdue University, I look forward to visiting hom
 
 The python script creates a `tkinter` GUI that enables the user to input a travel date for the departing and returning flight. After verifying that the entered dates are valid, the program uses the Python Library in [punitarani/fli](https://github.com/punitarani/fli) to search for trips via Google Flights and filter the results by the user-selected dates and the creator's standard flight requirements (1 adult passenger, economy class, 1 carry-on baggage, etc.). The matching results are displayed individually with basic information such as the total trip price, Airline Carrier, and flight timings.
 
-![Logic Flowchart diagram of *Get Me Out of Here!*](Project Planning Resources/Flowchart.png)
+![Logic Flowchart diagram of *Get Me Out of Here!*](Project_Planning_Resources/Flowchart.png)
 
 ## Tech Stack
 
@@ -70,7 +70,7 @@ python3 doesnt_exist_yet.py`
 - [ ] Advanced Flight Filtering (Ex. number of passengers, total flight time range, max connections, etc.)
 - [ ] Allow user to select results to export
 
-![Eisenhower Matrix of *Get Me Out of Here!*](Project Planning Resources/Eisenhower_Matrix.png)
+![Eisenhower Matrix of *Get Me Out of Here!*](Project_Planning_Resources/Eisenhower_Matrix.png)
 
 ## Author
 
