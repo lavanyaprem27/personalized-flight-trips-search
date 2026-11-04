@@ -22,33 +22,58 @@ The python script creates a `tkinter` GUI that enables the user to input a trave
 
 1. If it isn't already, install Python on your system. Releases can be found on the [Python Downloads Page](https://www.python.org/downloads/).
 
-2. Install the Python packages for the `Fli` and `tkcalendar` through the command line.
+2. Download the code in the repository either through GitHub as a ZIP file or by using `git clone` in the command line (make sure you have git installed for this method!).
 
 ```bash
-pip install tkcalendar
-pip install flights
+git clone https://github.com/lavanyaprem27/personalized-flight-trips-search.git
 ```
 
-3. Download the program file `doesnt_exist_yet.py` from this repository
+3. `cd` into the root folder in your system containing the code.
+
+```bash
+cd your\local\path\personalized-flight-trips-search
+```
+
+4. Create and activate the virtual environment. After this (venv) should appear at the start of a new terminal line.
+
+```bash
+#macOS/Linux
+python3 -m venv .venv
+source venv/bin/activate
+
+#Windows Command Prompt
+python -m venv .venv
+venv\Scripts\activate.bat
+
+#Windows PowerShell
+python -m venv .venv
+.\venv\Scripts\Activate.ps1
+```
+
+5. Install the dependencies associated with the file
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 
 1. In the terminal, navigate to the directory with the downloaded project file.
 
 ```bash
-cd path/to/file
+cd path\to\file
 ```
-2. Run the program.
 
+2. Run the program.
 
 ### Windows
 ```bash
-python doesnt_exist_yet.py`
+python personalized-flight-trips-search.py`
 ```
 
 ### macOS/Linux
 ```bash
-python3 doesnt_exist_yet.py`
+python3 personalized-flight-trips-search.py`
 ```
 
 ## Roadmap
