@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkcalendar import DateEntry
+from datetime import datetime, date, timedelta
 
 from fli.models import (
     Airport,
@@ -19,6 +20,19 @@ return_date = "2027-01-08"
 #variables to store airports
 origin_airport = Airport.IND
 destination_airport = Airport.DSM
+
+def format_date(date) -> str:
+    if isinstance(date, str):
+        date = datetime.strptime(date, "%Y-%m-%d")
+    return date.strftime("%A %B %d, %Y")
+
+def format_datetime(datetime_string: datetime) -> str:
+     return datetime_string.strftime("%A %B %d, %Y - %I:%M%p")
+
+def format_duration(minutes: int) -> str:
+    hours, mins = divmod(minutes, 60)
+    return f"{hours}hr {mins}min" if hours else f"{mins}min"
+
 
 def run():
 
@@ -51,41 +65,44 @@ def run():
 
     #print results
     print(f"{origin_airport.value} <--> {destination_airport.value}")
-    print(f"travel date: {departing_date} | return date: {return_date}")
+    print(f"travel date: {format_date(departing_date)} | return date: {format_date(return_date)}")
     print("***********************************************************\n")
+
+    #exit if no results found
     if results == None:
         print("Sorry, no flights found!")
         return
 
     print(f"{len(results)} trips found")
+
     for departing_flight, return_flight in results:
         print("\n___________________________________________________________")
 
-        print(f"Departing Flight: {departing_flight.duration} min\n")
+        print(f"Departing Flight: {format_duration(departing_flight.duration)}\n")
 
         for i in range(len(departing_flight.legs)):
             segment = departing_flight.legs[i]
-            print(f"Flight: {segment.airline.value} {segment.flight_number} ({segment.duration} min)")
-            print(f"Departure: {segment.departure_datetime} {segment.departure_airport.name}")
-            print(f"Arrival: {segment.arrival_datetime} {segment.arrival_airport.name}\n")
+            print(f"Flight: {segment.airline.value} {segment.flight_number} ({format_duration(segment.duration)})")
+            print(f"Departure: {format_datetime(segment.departure_datetime)} from {segment.departure_airport.name}")
+            print(f"Arrival: {format_datetime(segment.arrival_datetime)} from {segment.arrival_airport.name}\n")
 
             if i < len(departing_flight.legs) - 1:
                 layover = departing_flight.layovers[i]
-                print(f"Layover: {layover.duration}min in {layover.airport.name}\n")
+                print(f"Layover: {format_duration(layover.duration)} in {layover.airport.name}\n")
         
         print("-----------------------------------------------------------")
         
-        print(f"Returning Flight: {return_flight.duration}min\n")
+        print(f"Returning Flight: {format_duration(return_flight.duration)}\n")
 
         for i in range(len(return_flight.legs)):
                     segment = return_flight.legs[i]
-                    print(f"Flight: {segment.airline.value} {segment.flight_number} ({segment.duration} min)")
-                    print(f"Departure: {segment.departure_datetime} {segment.departure_airport.name}")
-                    print(f"Arrival: {segment.arrival_datetime} {segment.arrival_airport.name}\n")
+                    print(f"Flight: {segment.airline.value} {segment.flight_number} ({format_duration(segment.duration)})")
+                    print(f"Departure: {format_datetime(segment.departure_datetime)} from {segment.departure_airport.name}")
+                    print(f"Arrival: {format_datetime(segment.arrival_datetime)} from {segment.arrival_airport.name}\n")
         
                     if i < len(return_flight.legs) - 1:
                         layover = return_flight.layovers[i]
-                        print(f"Layover: {layover.duration}min in {layover.airport.name}\n")
+                        print(f"Layover: {format_duration(layover.duration)} in {layover.airport.name}\n")
         
         print("-----------------------------------------------------------")
 
