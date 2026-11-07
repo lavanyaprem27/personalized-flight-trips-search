@@ -3,7 +3,6 @@ from tkcalendar import DateEntry
 
 from fli.models import (
     Airport,
-    DateSearchFilters,
     FlightSearchFilters,
     FlightSegment,
     PassengerInfo,
@@ -43,7 +42,7 @@ def run():
         passenger_info=PassengerInfo(adults=1),
         seat_type=SeatType.ECONOMY,
         flight_segments=flight_segments,
-        sort_by=SortBy.CHEAPEST
+        sort_by=SortBy.TOP_FLIGHTS
     )
 
     #perform search
@@ -51,20 +50,45 @@ def run():
     results = search.search(filters)
 
     #print results
+    print(f"{origin_airport.value} <--> {destination_airport.value}")
+    print(f"travel date: {departing_date} | return date: {return_date}")
+    print("***********************************************************\n")
+    if results == None:
+        print("Sorry, no flights found!")
+        return
+
+    print(f"{len(results)} trips found")
     for departing_flight, return_flight in results:
         print("\n___________________________________________________________")
-        print("Departing Flight:\n")
-        for segment in departing_flight.legs:
-            print(f"Flight: {segment.airline.value} {segment.flight_number}")
-            print(f"Departure: {segment.departure_datetime}")
-            print(f"Arrival: {segment.arrival_datetime}\n")
+
+        print(f"Departing Flight: {departing_flight.duration} min\n")
+
+        for i in range(len(departing_flight.legs)):
+            segment = departing_flight.legs[i]
+            print(f"Flight: {segment.airline.value} {segment.flight_number} ({segment.duration} min)")
+            print(f"Departure: {segment.departure_datetime} {segment.departure_airport.name}")
+            print(f"Arrival: {segment.arrival_datetime} {segment.arrival_airport.name}\n")
+
+            if i < len(departing_flight.legs) - 1:
+                layover = departing_flight.layovers[i]
+                print(f"Layover: {layover.duration}min in {layover.airport.name}\n")
+        
         print("-----------------------------------------------------------")
-        print("Returning Flight:\n")
-        for segment in return_flight.legs:
-            print(f"Flight: {segment.airline.value} {segment.flight_number}")
-            print(f"Departure: {segment.departure_datetime}")
-            print(f"Arrival: {segment.arrival_datetime}\n")
+        
+        print(f"Returning Flight: {return_flight.duration}min\n")
+
+        for i in range(len(return_flight.legs)):
+                    segment = return_flight.legs[i]
+                    print(f"Flight: {segment.airline.value} {segment.flight_number} ({segment.duration} min)")
+                    print(f"Departure: {segment.departure_datetime} {segment.departure_airport.name}")
+                    print(f"Arrival: {segment.arrival_datetime} {segment.arrival_airport.name}\n")
+        
+                    if i < len(return_flight.legs) - 1:
+                        layover = return_flight.layovers[i]
+                        print(f"Layover: {layover.duration}min in {layover.airport.name}\n")
+        
         print("-----------------------------------------------------------")
+
         print(f"Total Price: ${departing_flight.price:.2f} ")
 
 
