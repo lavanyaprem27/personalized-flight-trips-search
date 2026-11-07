@@ -50,6 +50,24 @@ def run():
     search = SearchFlights()
     results = search.search(filters)
 
+    #print results
+    for departing_flight, return_flight in results:
+        print("\n___________________________________________________________")
+        print("Departing Flight:\n")
+        for segment in departing_flight.legs:
+            print(f"Flight: {segment.airline.value} {segment.flight_number}")
+            print(f"Departure: {segment.departure_datetime}")
+            print(f"Arrival: {segment.arrival_datetime}\n")
+        print("-----------------------------------------------------------")
+        print("Returning Flight:\n")
+        for segment in return_flight.legs:
+            print(f"Flight: {segment.airline.value} {segment.flight_number}")
+            print(f"Departure: {segment.departure_datetime}")
+            print(f"Arrival: {segment.arrival_datetime}\n")
+        print("-----------------------------------------------------------")
+        print(f"Total Price: ${departing_flight.price:.2f} ")
+
+
 
 if __name__ == "__main__":
     run()
