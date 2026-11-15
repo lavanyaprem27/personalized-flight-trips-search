@@ -20,10 +20,22 @@ class flightGUI(tk.Tk):
         self.homePage = searchPage(self.container, self)
         self.homePage.pack(fill="both", expand=True)
 
+        self.create_result_card("1")
+        self.create_result_card("2")
+        self.create_result_card("3")
+        self.create_result_card("4")
+
+    def create_result_card(self, flight_info):
+        #add a result card to search page panel
+        self.result_cards.append(self.homePage.create_result_card(flight_info))
+
+
 class searchPage(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.create_search_panel()
+        self.create_results_panel()
+
 
     def create_search_panel(self):
         #create panel for date search, and make it maintain aspect ratio
@@ -68,6 +80,53 @@ class searchPage(ttk.Frame):
         new_height = min(new_height, max_height)
 
         self.search_panel.config(height=new_height)
+
+    def create_results_panel(self):
+        #create panel to display cards of search results
+        results_style = ttk.Style().configure("results.TFrame", background="#545c80")
+        self.results_panel = ttk.Frame(self, style="results.TFrame")
+        self.results_panel.pack(fill="both", expand=True)
+
+        #create a frame to house scrollbar
+        self.results_frame = ttk.Frame(self.results_panel, style="results.TFrame")
+        self.results_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        self.results_frame.grid_columnconfigure(0, weight=1)
+        self.results_frame.grid_columnconfigure(1, weight=0)
+        self.results_frame.grid_rowconfigure(0, weight=1)
+
+
+        #create a scrollbar by making a scroll bar, a canvas, and a holder 
+        container_style = ttk.Style().configure("results_container.TFrame", background="#ffffff")
+        
+        self.results_canvas = tk.Canvas(self.results_frame)
+        self.results_canvas.grid(row=0, column=0, sticky="nsew")
+
+        self.results_scroll = ttk.Scrollbar(self.results_frame, orient="vertical", command=self.results_canvas.yview)
+        self.results_scroll.grid(row=0, column=1, sticky="ns")
+
+        self.results_canvas.configure(yscrollcommand=self.results_scroll.set)
+
+        self.results_container = ttk.Frame(self.results_canvas, style="results_container.TFrame", padding=10)
+        self.results_window = self.results_canvas.create_window((0,0), window=self.results_container, anchor="nw")
+
+
+        self.results_container.bind("<Configure>", lambda e: self.results_canvas.configure(scrollregion=self.results_canvas.bbox("all")))
+        self.results_canvas.bind("<Configure>", lambda e: self.results_canvas.itemconfig(self.results_window, width=e.width))
+        
+
+    def create_result_card(self, flight_info):
+        #makes a card to display a possible flight 
+        card_style = ttk.Style().configure("result_card.TFrame", background="#000000")
+        new_card = ttk.Frame(self.results_container, style="result_card.TFrame", padding=(10, 10))
+        new_card.pack(fill="x", pady=5)
+
+        label = ttk.Label(new_card, text=flight_info)
+        label.pack(side="top", padx=10, pady=10)
+
+        return new_card
+
+
+
 
 if __name__ == "__main__":
     gui = flightGUI()
