@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkcalendar import DateEntry
+from fli.search import SearchFlights
 
 class flightGUI(tk.Tk):
 
@@ -20,19 +21,25 @@ class flightGUI(tk.Tk):
         self.homePage = searchPage(self.container, self)
         self.homePage.pack(fill="both", expand=True)
 
-        self.create_result_card("1")
-        self.create_result_card("2")
-        self.create_result_card("3")
-        self.create_result_card("4")
-
-    def create_result_card(self, flight_info):
+    def create_result_card(self, tripInfo):
         #add a result card to search page panel
-        self.result_cards.append(self.homePage.create_result_card(flight_info))
+        self.result_cards.append(self.homePage.create_result_card(tripInfo))
+
+    def deleteResultCards(self):
+        for card in self.result_cards:
+            card.destroy()
+
+        self.result_cards.clear()
+
+    def createEmptyCard(self):
+        self.result_cards.append(self.homePage.create_empty_card())
 
 
 class searchPage(ttk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
+        self.controller = controller
+
         self.create_search_panel()
         self.create_results_panel()
 
@@ -75,8 +82,8 @@ class searchPage(ttk.Frame):
         self.bind_all("<Button-1>",  lambda e: e.widget.focus_set())
 
         #create submit button
-        submit_button = ttk.Button(self.input_panel, text="Search")
-        submit_button.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
+        self.submit_button = ttk.Button(self.input_panel, text="Search")
+        self.submit_button.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
 
     def resize_search_panel(self, event):
         #set aspect ratio
@@ -103,9 +110,9 @@ class searchPage(ttk.Frame):
                 #change start date to be equal to end date
                 self.start_date.set_date(self.end_date.get_date())
 
-        #set min and max dates for each appropriately to prevent overstepping
-        self.start_date.config(maxdate=self.end_date.get_date())
-        self.end_date.config(mindate=self.start_date.get_date())
+        # #set min and max dates for each appropriately to prevent overstepping
+        # self.start_date.config(maxdate=self.end_date.get_date())
+        # self.end_date.config(mindate=self.start_date.get_date())
 
 
 
@@ -142,7 +149,11 @@ class searchPage(ttk.Frame):
         self.results_canvas.bind("<Configure>", lambda e: self.results_canvas.itemconfig(self.results_window, width=e.width))
         
 
-    def create_result_card(self, flight_info):
+    def create_result_card(self, tripInfo):
+        #store departing and return flight info conveniently
+        departing_flight = tripInfo.departing_flight
+        return_flight = tripInfo.return_flight
+
         #makes a card to display a possible flight 
         ttk.Style().configure("result_card.TFrame", background="#000000")
         new_card = ttk.Frame(self.results_container, style="result_card.TFrame")
@@ -156,7 +167,7 @@ class searchPage(ttk.Frame):
         cost_panel = ttk.Frame(new_card, style="cost.TFrame")
         cost_panel.grid(row=0, column=2, sticky="nsew")
 
-        cost = ttk.Label(cost_panel, text="$450")
+        cost = ttk.Label(cost_panel, text=f"${tripInfo.cost}")
         cost.pack(expand=True, padx=10, pady=10)
 
         #creates colors for departing and return panels
@@ -166,28 +177,52 @@ class searchPage(ttk.Frame):
         departing_panel = ttk.Frame(new_card, style="info.TFrame", padding=5)
         departing_panel.grid(row=0, column=0, sticky="nsew")
 
-        depart_airline = ttk.Label(departing_panel, text="Departing Flight: Delta Airlines")
+        depart_airline = ttk.Label(departing_panel, text=f"Departing Flight: {departing_flight.airline}")
         depart_airline.pack(anchor="w")
 
-        depart_order = ttk.Label(departing_panel, text="IND→ORD→DSM")
+        depart_string = ""
+        for i in range(len(departing_flight.airports)):
+            if (i != 0):
+                depart_string += "→"
+            depart_string += f"{departing_flight.airports[i]}"
+        
+        depart_order = ttk.Label(departing_panel, text=depart_string)
         depart_order.pack(anchor="w")
 
-        depart_time = ttk.Label(departing_panel, text="12:00AM to 3:00PM (15hrs)")
+        depart_time = ttk.Label(departing_panel, 
+            text=f"{departing_flight.departing_time} to {departing_flight.arrival_time} ({departing_flight.duration})")
         depart_time.pack(anchor="w")
 
         #panel for return flight info
         return_panel = ttk.Frame(new_card, style="info.TFrame", padding=5)
         return_panel.grid(row=0, column=1, sticky="nsew")
 
-        return_airline = ttk.Label(return_panel, text="Return Flight: Delta Airlines")
+        return_airline = ttk.Label(return_panel, text=f"Returning Flight: {return_flight.airline}")
         return_airline.pack(anchor="w")
 
-
-        return_order = ttk.Label(return_panel, text="DSM→ORD→IND")
+        return_string = ""
+        for i in range(len(return_flight.airports)):
+            if (i != 0):
+                return_string += "→"
+            return_string += f"{return_flight.airports[i]}"
+        
+        return_order = ttk.Label(return_panel, text=return_string)
         return_order.pack(anchor="w")
 
-        return_time = ttk.Label(return_panel, text="9:00PM to 12:00PM (15hrs)")
+        return_time = ttk.Label(return_panel, 
+            text=f"{return_flight.departing_time} to {return_flight.arrival_time} ({return_flight.duration})")
         return_time.pack(anchor="w")
+
+        return new_card
+
+    def create_empty_card(self):
+        #makes a card to display a possible flight 
+        ttk.Style().configure("empty.TFrame", background="#C62121")
+        new_card = ttk.Frame(self.results_container, style="empty.TFrame", padding=10)
+        new_card.pack(fill="x", pady=5)
+
+        label = ttk.Label(new_card, text="No results found!")
+        label.pack(expand="true")
 
         return new_card
 
