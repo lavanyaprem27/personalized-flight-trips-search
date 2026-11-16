@@ -56,12 +56,23 @@ class searchPage(ttk.Frame):
         end_date_label.grid(row=0, column = 1, padx=5, pady=5)
         
         #create start date
-        self.start_date = DateEntry(self.input_panel)
+        self.start_date = DateEntry(self.input_panel, date_pattern="mm/dd/yyyy")
         self.start_date.grid(row=1, column = 0, padx=5, pady=5)
 
         #create end date
-        self.end_date = DateEntry(self.input_panel)
+        self.end_date = DateEntry(self.input_panel, date_pattern="mm/dd/yyyy")
         self.end_date.grid(row=1, column = 1, padx=5, pady=5)
+
+        #add validators to ensure start < end
+        self.end_date.bind("<<DateEntrySelected>>", self.regulate_dates)
+        self.start_date.bind("<<DateEntrySelected>>", self.regulate_dates)
+
+        self.end_date.bind("<FocusOut>", self.regulate_dates)
+        self.start_date.bind("<FocusOut>", self.regulate_dates)
+
+        #add a function to shift focus to anything that was clicked
+        #prevents dateTime entries from staying open forever
+        self.bind_all("<Button-1>",  lambda e: e.widget.focus_set())
 
         #create submit button
         submit_button = ttk.Button(self.input_panel, text="Search")
@@ -80,6 +91,23 @@ class searchPage(ttk.Frame):
         new_height = min(new_height, max_height)
 
         self.search_panel.config(height=new_height)
+
+    def regulate_dates(self, event):
+        #if the start date ends up being after the end date,
+        #update the non-active dateEntry to be the same day as the active one
+        if (self.start_date.get_date() > self.end_date.get_date()):
+            if event.widget == self.start_date:
+                #change end date to be equal to start date
+                self.end_date.set_date(self.start_date.get_date())
+            else:
+                #change start date to be equal to end date
+                self.start_date.set_date(self.end_date.get_date())
+
+        #set min and max dates for each appropriately to prevent overstepping
+        self.start_date.config(maxdate=self.end_date.get_date())
+        self.end_date.config(mindate=self.start_date.get_date())
+
+
 
     def create_results_panel(self):
         #create panel to display cards of search results
@@ -124,9 +152,6 @@ class searchPage(ttk.Frame):
         label.pack(side="top", padx=10, pady=10)
 
         return new_card
-
-
-
 
 if __name__ == "__main__":
     gui = flightGUI()
