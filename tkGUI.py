@@ -39,7 +39,7 @@ class searchPage(ttk.Frame):
 
     def create_search_panel(self):
         #create panel for date search, and make it maintain aspect ratio
-        search_style = ttk.Style().configure("search.TFrame", background="#7280bf")
+        ttk.Style().configure("search.TFrame", background="#7280bf")
         self.search_panel = ttk.Frame(self, style="search.TFrame")
         self.search_panel.pack(fill="x")
         self.bind("<Configure>", self.resize_search_panel)
@@ -111,7 +111,7 @@ class searchPage(ttk.Frame):
 
     def create_results_panel(self):
         #create panel to display cards of search results
-        results_style = ttk.Style().configure("results.TFrame", background="#545c80")
+        ttk.Style().configure("results.TFrame", background="#545c80")
         self.results_panel = ttk.Frame(self, style="results.TFrame")
         self.results_panel.pack(fill="both", expand=True)
 
@@ -124,7 +124,7 @@ class searchPage(ttk.Frame):
 
 
         #create a scrollbar by making a scroll bar, a canvas, and a holder 
-        container_style = ttk.Style().configure("results_container.TFrame", background="#ffffff")
+        ttk.Style().configure("results_container.TFrame", background="#ffffff")
         
         self.results_canvas = tk.Canvas(self.results_frame)
         self.results_canvas.grid(row=0, column=0, sticky="nsew")
@@ -144,12 +144,50 @@ class searchPage(ttk.Frame):
 
     def create_result_card(self, flight_info):
         #makes a card to display a possible flight 
-        card_style = ttk.Style().configure("result_card.TFrame", background="#000000")
-        new_card = ttk.Frame(self.results_container, style="result_card.TFrame", padding=(10, 10))
+        ttk.Style().configure("result_card.TFrame", background="#000000")
+        new_card = ttk.Frame(self.results_container, style="result_card.TFrame")
         new_card.pack(fill="x", pady=5)
+        new_card.columnconfigure(0, weight=3, uniform="columns")
+        new_card.columnconfigure(1, weight=3, uniform="columns")
+        new_card.columnconfigure(2, weight=2, uniform="columns")
 
-        label = ttk.Label(new_card, text=flight_info)
-        label.pack(side="top", padx=10, pady=10)
+        #creates a small side panel for total cost display
+        ttk.Style().configure("cost.TFrame", background="#10882E")
+        cost_panel = ttk.Frame(new_card, style="cost.TFrame")
+        cost_panel.grid(row=0, column=2, sticky="nsew")
+
+        cost = ttk.Label(cost_panel, text="$450")
+        cost.pack(expand=True, padx=10, pady=10)
+
+        #creates colors for departing and return panels
+        ttk.Style().configure("info.TFrame", background="#6EAD7E")
+
+        #panel for departing flight info
+        departing_panel = ttk.Frame(new_card, style="info.TFrame", padding=5)
+        departing_panel.grid(row=0, column=0, sticky="nsew")
+
+        depart_airline = ttk.Label(departing_panel, text="Departing Flight: Delta Airlines")
+        depart_airline.pack(anchor="w")
+
+        depart_order = ttk.Label(departing_panel, text="IND→ORD→DSM")
+        depart_order.pack(anchor="w")
+
+        depart_time = ttk.Label(departing_panel, text="12:00AM to 3:00PM (15hrs)")
+        depart_time.pack(anchor="w")
+
+        #panel for return flight info
+        return_panel = ttk.Frame(new_card, style="info.TFrame", padding=5)
+        return_panel.grid(row=0, column=1, sticky="nsew")
+
+        return_airline = ttk.Label(return_panel, text="Return Flight: Delta Airlines")
+        return_airline.pack(anchor="w")
+
+
+        return_order = ttk.Label(return_panel, text="DSM→ORD→IND")
+        return_order.pack(anchor="w")
+
+        return_time = ttk.Label(return_panel, text="9:00PM to 12:00PM (15hrs)")
+        return_time.pack(anchor="w")
 
         return new_card
 
