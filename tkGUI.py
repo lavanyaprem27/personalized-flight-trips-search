@@ -21,6 +21,11 @@ class flightGUI(tk.Tk):
         self.homePage = searchPage(self.container, self)
         self.homePage.pack(fill="both", expand=True)
 
+    def create_styles(self):
+        #colors
+        #fonts
+        pass
+
     def create_result_card(self, tripInfo):
         #add a result card to search page panel
         self.result_cards.append(self.homePage.create_result_card(tripInfo))
@@ -33,6 +38,9 @@ class flightGUI(tk.Tk):
 
     def createEmptyCard(self):
         self.result_cards.append(self.homePage.create_empty_card())
+
+    def createTempCard(self):
+        self.result_cards.append(self.homePage.create_temporary_card())
 
 
 class searchPage(ttk.Frame):
@@ -47,13 +55,23 @@ class searchPage(ttk.Frame):
     def create_search_panel(self):
         #create panel for date search, and make it maintain aspect ratio
         ttk.Style().configure("search.TFrame", background="#7280bf")
-        self.search_panel = ttk.Frame(self, style="search.TFrame")
+        self.search_panel = ttk.Frame(self, style="search.TFrame", padding=10)
         self.search_panel.pack(fill="x")
         self.bind("<Configure>", self.resize_search_panel)
 
+        #create panel for title
+        self.title_panel = ttk.Frame(self.search_panel, style="search.TFrame", padding=10)
+        self.title_panel.pack(side="top")
+
+        #create title and subtitle
+        self.title = ttk.Label(self.title_panel, text="GET ME OUT OF HERE!")
+        self.title.grid(row=0, column=0)
+        self.subtitle = ttk.Label(self.title_panel, text="Search roundtrips between IND and DSM")
+        self.subtitle.grid(row=1, column=0)
+
         #create panel to house input
         self.input_panel = ttk.Frame(self.search_panel, style="search.TFrame")
-        self.input_panel.place(relx=0.5, rely=0.5, anchor="center")
+        self.input_panel.pack()
 
         #create start and end date labels
         start_date_label = ttk.Label(self.input_panel, text="Departing Date:")
@@ -133,7 +151,7 @@ class searchPage(ttk.Frame):
         #create a scrollbar by making a scroll bar, a canvas, and a holder 
         ttk.Style().configure("results_container.TFrame", background="#ffffff")
         
-        self.results_canvas = tk.Canvas(self.results_frame)
+        self.results_canvas = tk.Canvas(self.results_frame, bg="#ffffff", highlightthickness=0)
         self.results_canvas.grid(row=0, column=0, sticky="nsew")
 
         self.results_scroll = ttk.Scrollbar(self.results_frame, orient="vertical", command=self.results_canvas.yview)
@@ -144,10 +162,8 @@ class searchPage(ttk.Frame):
         self.results_container = ttk.Frame(self.results_canvas, style="results_container.TFrame", padding=10)
         self.results_window = self.results_canvas.create_window((0,0), window=self.results_container, anchor="nw")
 
-
         self.results_container.bind("<Configure>", lambda e: self.results_canvas.configure(scrollregion=self.results_canvas.bbox("all")))
         self.results_canvas.bind("<Configure>", lambda e: self.results_canvas.itemconfig(self.results_window, width=e.width))
-        
 
     def create_result_card(self, tripInfo):
         #store departing and return flight info conveniently
@@ -222,6 +238,17 @@ class searchPage(ttk.Frame):
         new_card.pack(fill="x", pady=5)
 
         label = ttk.Label(new_card, text="No results found!")
+        label.pack(expand="true")
+
+        return new_card
+
+    def create_temporary_card(self):
+        #makes a card to display a possible flight 
+        ttk.Style().configure("empty.TFrame", background="#217EC6")
+        new_card = ttk.Frame(self.results_container, style="empty.TFrame", padding=10)
+        new_card.pack(fill="x", pady=5)
+
+        label = ttk.Label(new_card, text="Searching...")
         label.pack(expand="true")
 
         return new_card
