@@ -10,7 +10,7 @@ def run():
 
 def get_dates():
     gui.deleteResultCards()
-    gui.createTempCard()
+    gui.create_message_card("searching")
     print("starting!")
     
     start_date = format_input(gui.homePage.start_date.get_date())
@@ -25,15 +25,20 @@ def get_dates():
 
 def perform_search(start_date, end_date):
     #what happens in the search thread
-    results = searchFlights(start_date, end_date)
-    gui.after(0, lambda: display_results(results))
+    #use a try/except to display an error message for exceptions
+    try:
+        results = searchFlights(start_date, end_date)
+        gui.after(0, lambda: display_results(results))
+    except Exception:
+        gui.deleteResultCards()
+        gui.create_message_card("error")
 
 
 def display_results(results):
     #queued GUI update
     gui.deleteResultCards()
     if results == None:
-        gui.createEmptyCard()
+        gui.create_message_card("no_results")
         return
 
     for departing_flight, return_flight in results:
