@@ -44,9 +44,9 @@ class flightGUI(tk.Tk):
         self.homePage = searchPage(self.container, self)
         self.homePage.pack(fill="both", expand=True)
 
-    def create_result_card(self, tripInfo):
+    def create_result_card(self, tripInfo, index):
         #add a result card to search page panel
-        self.result_cards.append(self.homePage.create_result_card(tripInfo))
+        self.result_cards.append(self.homePage.create_result_card(tripInfo, index))
 
     def deleteResultCards(self):
         for card in self.result_cards:
@@ -221,7 +221,7 @@ class searchPage(ttk.Frame):
         self.results_container.bind("<Configure>", lambda e: self.results_canvas.configure(scrollregion=self.results_canvas.bbox("all")))
         self.results_canvas.bind("<Configure>", lambda e: self.results_canvas.itemconfig(self.results_window, width=e.width))
 
-    def create_result_card(self, tripInfo):
+    def create_result_card(self, tripInfo, index):
         #store departing and return flight info conveniently
         departing_flight = tripInfo.departing_flight
         return_flight = tripInfo.return_flight
@@ -270,7 +270,7 @@ class searchPage(ttk.Frame):
         depart_order.pack(anchor="w")
 
         depart_time = ttk.Label(departing_panel, 
-            text=f"{departing_flight.departing_time} to {departing_flight.arrival_time} ({departing_flight.duration})",
+            text=f"{departing_flight.departing_time} to {departing_flight.arrival_time} ({departing_flight.total_duration})",
             style="result_text.TLabel")
         depart_time.pack(anchor="w")
 
@@ -291,7 +291,7 @@ class searchPage(ttk.Frame):
         return_order.pack(anchor="w")
 
         return_time = ttk.Label(return_panel, 
-            text=f"{return_flight.departing_time} to {return_flight.arrival_time} ({return_flight.duration})",
+            text=f"{return_flight.departing_time} to {return_flight.arrival_time} ({return_flight.total_duration})",
             style="result_text.TLabel")
         return_time.pack(anchor="w")
 

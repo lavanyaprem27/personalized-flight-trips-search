@@ -110,17 +110,23 @@ def consoleDemo(results):
 
 #helper classes for parsing info
 class tripInfo:
-    def __init__(self, departing_flight, return_flight):
+    def __init__(self, start_date, end_date, departing_flight, return_flight):
         #store cost
         self.cost = departing_flight.price
+
+        #store trip dates as formatted strings
+        self.start_date = format_date(start_date)
+        self.end_date = format_date(end_date)
+
+        #store flights as flightInfo objects
         self.departing_flight = flightInfo(departing_flight)
         self.return_flight = flightInfo(return_flight)
 
 
 class flightInfo:
     def __init__(self, flight):
-        #store duration as formatted string
-        self.duration = format_duration(flight.duration)
+        #store total duration as formatted string
+        self.total_duration = format_duration(flight.duration)
 
         #store airline as string
         self.airline = flight.legs[0].airline.value
@@ -130,11 +136,39 @@ class flightInfo:
         self.arrival_time = format_time(flight.legs[-1].arrival_datetime)
 
         #store airports as strings in list
-        self.airports = []
-        for leg in flight.legs:
-               self.airports.append(leg.departure_airport.name)
+        self.airports = [leg.departure_airport.name for leg in flight.legs]
         self.airports.append(flight.legs[-1].arrival_airport.name)
 
+        #store flight legs in list
+        self.legs = [legInfo(leg) for leg in flight.legs]
+
+        #store layovers in list
+        self.layovers = [layoverInfo(layover) for layover in flight.layovers]
+
+class legInfo:
+    def __init__(self, leg):
+        #store airports as dictionary of formatted strings
+        self.airports = {
+            "departing": leg.departure_airport.name,
+            "arrival": leg.arrival_airport.name
+        }
+
+        #store times as dictionary of formatted strings
+        self.times = {
+            "departing": format_time(leg.departure_datetime),
+            "arrival": format_time(leg.arrival_datetime)
+        }
+
+        #store duration as formatted string
+        self.duration = format_duration(leg.duration)
+
+class layoverInfo:
+    def __init__(self, layover):
+        #store layover airport as string
+        self.airport = layover.airport.value
+
+        #store layover duration as formatted string
+        self.duration = format_duration(layover.duration) 
           
 
 if __name__ == "__main__":
