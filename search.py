@@ -111,8 +111,8 @@ def consoleDemo(results):
 #helper classes for parsing info
 class tripInfo:
     def __init__(self, start_date, end_date, departing_flight, return_flight):
-        #store cost
-        self.cost = departing_flight.price
+        #store cost as formatted string
+        self.cost = f"${departing_flight.price:.2f}"
 
         #store trip dates as formatted strings
         self.start_date = format_date(start_date)
@@ -162,13 +162,13 @@ class legInfo:
         #store duration as formatted string
         self.duration = format_duration(leg.duration)
 
-        #store airplane as formatted string
-        self.airplane = f"{leg.airline.value} {leg.flight_number}"
+        #store aircraft as formatted string
+        self.aircraft = f"{leg.airline.value} {leg.flight_number}"
 
 class layoverInfo:
     def __init__(self, layover):
         #store layover airport as string
-        self.airport = layover.airport.value
+        self.airport = layover.airport.name
 
         #store layover duration as formatted string
         self.duration = format_duration(layover.duration) 

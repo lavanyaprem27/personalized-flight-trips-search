@@ -50,19 +50,22 @@ class flightGUI(tk.Tk):
         self.detailsPage = detailsPage(self.container, self)
         self.detailsPage.grid(row=0, column=0, sticky="nsew")
 
-        self.detailsPage.tkraise()
+        self.homePage.tkraise()
 
         
 
-    def create_result_card(self, tripInfo, index):
+    def create_result_card(self, tripInfo):
         #add a result card to search page panel
-        self.result_cards.append(self.homePage.create_result_card(tripInfo, index))
+        self.result_cards.append(self.homePage.create_result_card(tripInfo))
 
     def deleteResultCards(self):
         for card in self.result_cards:
             card.destroy()
 
         self.result_cards.clear()
+
+        #reset scrollbar
+        self.homePage.results_canvas.yview_moveto(0)
 
     def create_message_card(self, type):
         #create specialized message cards based on inputted "type"
@@ -79,6 +82,10 @@ class flightGUI(tk.Tk):
             case _:
                 self.result_cards.append(self.homePage.create_error_card())
                 return
+
+    def open_details(self, tripInfo):
+        self.detailsPage.fill_template(tripInfo)
+        self.detailsPage.tkraise()
 
 
 class searchPage(ttk.Frame):
@@ -147,7 +154,9 @@ class searchPage(ttk.Frame):
             "othermonthweforeground": self.controller.COLORS["black"],
             "selectbackground": self.controller.COLORS["campus_gold"],
             "othermonth": self.controller.COLORS["gray"],
-            "font": self.controller.FONTS["regular"]
+            "font": self.controller.FONTS["regular"],
+            "cursor": "xterm",
+            "calendar_cursor": "hand2"
         }
 
         self.start_date = DateEntry(self.input_panel, date_pattern="mm/dd/yyyy", mindate=date.today(), **calendar_theme)
@@ -173,7 +182,7 @@ class searchPage(ttk.Frame):
             foreground=self.controller.COLORS["white"])
         ttk.Style().map("submit.TButton",
             background=[("active", self.controller.COLORS["old_gold"]), ("pressed", self.controller.COLORS["old_gold"])])
-        self.submit_button = ttk.Button(self.input_panel, text="SEARCH", style="submit.TButton")
+        self.submit_button = ttk.Button(self.input_panel, text="SEARCH", style="submit.TButton", cursor="hand2")
         self.submit_button.grid(row=2, column=0, columnspan=2, padx=5, pady=5)
 
     def resize_search_panel(self, event):
@@ -232,7 +241,7 @@ class searchPage(ttk.Frame):
         self.results_container.bind("<Configure>", lambda e: self.results_canvas.configure(scrollregion=self.results_canvas.bbox("all")))
         self.results_canvas.bind("<Configure>", lambda e: self.results_canvas.itemconfig(self.results_window, width=e.width))
 
-    def create_result_card(self, tripInfo, index):
+    def create_result_card(self, tripInfo):
         #store departing and return flight info conveniently
         departing_flight = tripInfo.departing_flight
         return_flight = tripInfo.return_flight
@@ -253,7 +262,7 @@ class searchPage(ttk.Frame):
         ttk.Style().configure("cost.TLabel", font=self.controller.FONTS["header"],
             background=self.controller.COLORS["campus_gold"],
             foreground=self.controller.COLORS["white"])
-        cost = ttk.Label(cost_panel, text=f"${tripInfo.cost}", style="cost.TLabel")
+        cost = ttk.Label(cost_panel, text=f"{tripInfo.cost}", style="cost.TLabel")
         cost.pack(expand=True, padx=10, pady=10)
 
         #creates colors and fonts for departing and return panels
@@ -306,7 +315,20 @@ class searchPage(ttk.Frame):
             style="result_text.TLabel")
         return_time.pack(anchor="w")
 
+        #redirect to details page upon click
+        self.make_card_clickable(new_card, lambda e: self.controller.open_details(tripInfo))
+
         return new_card
+
+    def make_card_clickable(self, card, function):
+        #applies the bind to the original card, and changes pointer
+        card.bind("<Button-1>", function)
+        card.configure(cursor="hand2")
+
+        #recursively adds binding to child elements
+        for child_element in card.winfo_children():
+            self.make_card_clickable(child_element, function)
+
 
     def create_empty_card(self):
         #makes a card to display a possible flight 
@@ -363,7 +385,7 @@ class detailsPage(ttk.Frame):
         self.controller = controller
 
         self.create_template()
-        self.fill_template()
+        # self.fill_template()
 
     def create_template(self):
         #create a panel to serve as heading
@@ -438,37 +460,49 @@ class detailsPage(ttk.Frame):
             foreground=self.controller.COLORS["white"])
         ttk.Style().map("back.TButton",
             background=[("active", self.controller.COLORS["old_gold"]), ("pressed", self.controller.COLORS["old_gold"])])
-        self.submit_button = ttk.Button(self.back_panel, text="BACK", style="back.TButton")
-        self.submit_button.pack(fill="both", expand=True)
+        self.back_button = ttk.Button(self.back_panel, text="BACK", style="back.TButton", cursor="hand2")
+        self.back_button.pack(fill="both", expand=True)
+        self.back_button.configure(command=lambda: self.controller.homePage.tkraise())
 
-    def fill_template(self):
+    def fill_template(self, tripInfo):
         #clear sections
         for section in self.sections:
             section.destroy()
 
         self.sections.clear()
 
+        #reset scrollbar
+        self.details_canvas.yview_moveto(0)
+
+        #update template
+        self.details_heading.config(text=f"{tripInfo.start_date} - {tripInfo.end_date}")
+        self.details_cost.config(text=f"{tripInfo.cost}")
 
         #add sections for departing and return flight
-        self.add_flight_info()
-        self.add_flight_info()
+        self.add_flight_info(tripInfo.departing_flight, tripInfo.start_date)
+        self.add_flight_info(tripInfo.return_flight, tripInfo.end_date)
 
-    def add_flight_info(self):
+    def add_flight_info(self, flightInfo, date):
         #create a panel to hold flight info
         flight_details_panel = ttk.Frame(self.details_container)
         flight_details_panel.pack(fill="x", pady=5)
 
-        #make a topbar to list type of flight (departing vs. arrival) and total flight time
+        #make a topbar to list type of flight (departing vs. arrival), total flight time, and date
         ttk.Style().configure("flight_panel.TFrame", background=self.controller.COLORS["campus_gold"])
         flight_topbar = ttk.Frame(flight_details_panel, style="flight_panel.TFrame", padding=10)
         flight_topbar.pack(side="top", fill="x")
 
         #add text to the topbar
-        ttk.Style().configure("flight_heading.TLabel", justify="left", font=self.controller.FONTS["header"],
+        ttk.Style().configure("flight_heading.TLabel", font=self.controller.FONTS["header"],
             background=self.controller.COLORS["campus_gold"],
             foreground=self.controller.COLORS["white"])
-        flight_heading = ttk.Label(flight_topbar, text="Departing Flight (1hr 20m)", style="flight_heading.TLabel")
-        flight_heading.pack(side="left")
+        ttk.Style().configure("flight_subheading.TLabel", font=self.controller.FONTS["label"],
+            background=self.controller.COLORS["campus_gold"],
+            foreground=self.controller.COLORS["white"])
+        flight_heading = ttk.Label(flight_topbar, text=f"Departing Flight ({flightInfo.total_duration})", style="flight_heading.TLabel")
+        flight_heading.pack(side="top")
+        flight_subheading = ttk.Label(flight_topbar, text=f"{date}", style="flight_subheading.TLabel")
+        flight_subheading.pack(side="top")
 
         #create a container to hold the specific flight info
         ttk.Style().configure("flight_container.TFrame", background=self.controller.COLORS["old_gold"])
@@ -482,29 +516,29 @@ class detailsPage(ttk.Frame):
         ttk.Style().configure("flight_details_text.TLabel", font=self.controller.FONTS["regular"],
             background=self.controller.COLORS["white"])
         
-        for i in range(2):
+        for i in range(len(flightInfo.legs)):
             #make a card with flight leg details
             flight_leg_card = ttk.Frame(flight_details_container, style="flight_details_card.TFrame", padding=10)
             flight_leg_card.pack(side="top", fill="x", pady=5)
 
             #add the text to the flight leg details card
-            flight_leg_title = ttk.Label(flight_leg_card, text="Flight: 1hr 40min", style="flight_details_label.TLabel")
+            flight_leg_title = ttk.Label(flight_leg_card, text=f"Flight: {flightInfo.legs[i].duration}", style="flight_details_label.TLabel")
             flight_leg_title.pack(side="top", fill="x")
-            flight_leg_airplane = ttk.Label(flight_leg_card, text="Aircraft: United Airlines 2770", style="flight_details_text.TLabel")
+            flight_leg_airplane = ttk.Label(flight_leg_card, text=f"Aircraft: {flightInfo.legs[i].aircraft}", style="flight_details_text.TLabel")
             flight_leg_airplane.pack(side="top", fill="x")
-            flight_leg_departure = ttk.Label(flight_leg_card, text="Departure: Monday November 23, 2026 - 06:45PM from DSM", style="flight_details_text.TLabel")
+            flight_leg_departure = ttk.Label(flight_leg_card, text=f"Departure: {flightInfo.legs[i].times["departing"]} from {flightInfo.legs[i].airports["departing"]}", style="flight_details_text.TLabel")
             flight_leg_departure.pack(side="top", fill="x")
-            flight_leg_arrival = ttk.Label(flight_leg_card, text="Return: Monday November 23, 2026 - 08:25PM from ORD", style="flight_details_text.TLabel")
+            flight_leg_arrival = ttk.Label(flight_leg_card, text=f"Arrival: {flightInfo.legs[i].times["arrival"]} from {flightInfo.legs[i].airports["arrival"]}", style="flight_details_text.TLabel")
             flight_leg_arrival.pack(side="top", fill="x")
 
-            if i < 2 - 1:
+            if i < len(flightInfo.legs) - 1:
                 #create a layover card in between each flight leg
                 flight_layover_card = ttk.Frame(flight_details_container, style="flight_details_card.TFrame", padding=10)
                 flight_layover_card.pack(side="top", fill="x", pady=5)
 
-                flight_layover_title = ttk.Label(flight_layover_card, text="Layover: 1hr 10min", style="flight_details_label.TLabel")
+                flight_layover_title = ttk.Label(flight_layover_card, text=f"Layover: {flightInfo.layovers[i].duration}", style="flight_details_label.TLabel")
                 flight_layover_title.pack(side="top", fill="x")
-                flight_layover_airport = ttk.Label(flight_layover_card, text="Airport: ORD", style="flight_details_text.TLabel")
+                flight_layover_airport = ttk.Label(flight_layover_card, text=f"Airport: {flightInfo.layovers[i].airport}", style="flight_details_text.TLabel")
                 flight_layover_airport.pack(side="top", fill="x")
             
         #finally, add flight info card to sections list
