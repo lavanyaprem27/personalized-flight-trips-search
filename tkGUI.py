@@ -41,8 +41,18 @@ class flightGUI(tk.Tk):
         self.container = ttk.Frame(self)
         self.container.pack(fill="both", expand=True)
 
+        self.container.rowconfigure(0, weight=1)
+        self.container.columnconfigure(0, weight=1)
+
         self.homePage = searchPage(self.container, self)
-        self.homePage.pack(fill="both", expand=True)
+        self.homePage.grid(row=0, column=0, sticky="nsew")
+
+        self.detailsPage = detailsPage(self.container, self)
+        self.detailsPage.grid(row=0, column=0, sticky="nsew")
+
+        self.detailsPage.tkraise()
+
+        
 
     def create_result_card(self, tripInfo, index):
         #add a result card to search page panel
@@ -72,6 +82,7 @@ class flightGUI(tk.Tk):
 
 
 class searchPage(ttk.Frame):
+
     def __init__(self, parent, controller):
         super().__init__(parent)
         self.controller = controller
@@ -192,12 +203,12 @@ class searchPage(ttk.Frame):
 
     def create_results_panel(self):
         #create panel to display cards of search results
-        ttk.Style().configure("results.TFrame", background=self.controller.COLORS["gray"])
-        self.results_panel = ttk.Frame(self, style="results.TFrame")
+        ttk.Style().configure("results_border.TFrame", background=self.controller.COLORS["gray"])
+        self.results_panel = ttk.Frame(self, style="results_border.TFrame")
         self.results_panel.pack(fill="both", expand=True)
 
         #create a frame to house scrollbar
-        self.results_frame = ttk.Frame(self.results_panel, style="results.TFrame")
+        self.results_frame = ttk.Frame(self.results_panel, style="results_border.TFrame")
         self.results_frame.pack(fill="both", expand=True, padx=10, pady=10)
         self.results_frame.grid_columnconfigure(0, weight=1)
         self.results_frame.grid_columnconfigure(1, weight=0)
@@ -341,6 +352,88 @@ class searchPage(ttk.Frame):
         label.pack(expand="true")
 
         return new_card
+
+class detailsPage(ttk.Frame):
+
+    #array to hold all the info frames
+    sections = []
+    
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+
+        self.create_template()
+
+    def create_template(self):
+        #create a panel to serve as heading
+        ttk.Style().configure("details_topbar.TFrame", background=self.controller.COLORS["black"])
+        self.details_topbar = ttk.Frame(self, style="details_topbar.TFrame")
+        self.details_topbar.pack(side="top", fill="x")
+
+        self.details_topbar.columnconfigure(0, weight=5, uniform="columns")
+        self.details_topbar.columnconfigure(1, weight=1, uniform="columns")
+
+        #create a container for the heading
+        ttk.Style().configure("details_heading_panel.TFrame", background=self.controller.COLORS["black"])
+        self.details_heading_panel = ttk.Frame(self.details_topbar, style="details_heading_panel.TFrame", padding=20)
+        self.details_heading_panel.grid(row=0, column=0, sticky="nsew")
+
+        #add text to heading, use dummy values for now
+        ttk.Style().configure("details_dates.TLabel", justify="left", font=self.controller.FONTS["header"],
+            background=self.controller.COLORS["black"],
+            foreground=self.controller.COLORS["white"])
+        self.details_heading = ttk.Label(self.details_heading_panel, text="Monday November 23, 2026 - Monday November 23, 2026", style="details_dates.TLabel")
+        self.details_heading.pack(side="left", fill="both", expand=True)
+
+        self.details_heading_panel.bind("<Configure>", lambda e: self.details_heading.config(wraplength=(e.width - 50)))
+
+        #add a corner for the cost
+        ttk.Style().configure("details_cost_panel.TFrame", background=self.controller.COLORS["campus_gold"])
+        self.details_cost_panel = ttk.Frame(self.details_topbar, style="details_cost_panel.TFrame", padding=10)
+        self.details_cost_panel.grid(row=0, column=1, sticky="nsew")
+
+        #add cost text
+        ttk.Style().configure("details_cost.TLabel", justify="center", font=self.controller.FONTS["subtitle"],
+            background=self.controller.COLORS["campus_gold"],
+            foreground=self.controller.COLORS["white"])
+        self.details_cost = ttk.Label(self.details_cost_panel, text="$650", style="details_cost.TLabel")
+        self.details_cost.place(relx=0.5,rely=0.5, anchor="center")
+
+
+
+
+        #create panel to display cards of search results
+        ttk.Style().configure("details_border.TFrame", background=self.controller.COLORS["gray"])
+        self.details_panel = ttk.Frame(self, style="details_border.TFrame")
+        self.details_panel.pack(side="top", fill="both", expand=True)
+
+        #create a frame to house scrollbar
+        self.details_frame = ttk.Frame(self.details_panel, style="details_border.TFrame")
+        self.details_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        self.details_frame.grid_columnconfigure(0, weight=1)
+        self.details_frame.grid_columnconfigure(1, weight=0)
+        self.details_frame.grid_rowconfigure(0, weight=1)
+
+
+        #create a scrollbar by making a scroll bar, a canvas, and a holder 
+        ttk.Style().configure("details_container.TFrame", background=self.controller.COLORS["white"])
+        
+        self.details_canvas = tk.Canvas(self.details_frame, bg=self.controller.COLORS["white"], highlightthickness=0)
+        self.details_canvas.grid(row=0, column=0, sticky="nsew")
+
+        self.details_scroll = ttk.Scrollbar(self.details_frame, orient="vertical", command=self.details_canvas.yview)
+        self.details_scroll.grid(row=0, column=1, sticky="ns")
+
+        self.details_canvas.configure(yscrollcommand=self.details_scroll.set)
+
+        self.details_container = ttk.Frame(self.details_canvas, style="results_container.TFrame", padding=10)
+        self.details_window = self.details_canvas.create_window((0,0), window=self.details_container, anchor="nw")
+
+        self.details_container.bind("<Configure>", lambda e: self.details_canvas.configure(scrollregion=self.details_canvas.bbox("all")))
+        self.details_canvas.bind("<Configure>", lambda e: self.details_canvas.itemconfig(self.details_window, width=e.width))
+
+
+    
 
 if __name__ == "__main__":
     gui = flightGUI()

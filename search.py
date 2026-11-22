@@ -162,6 +162,9 @@ class legInfo:
         #store duration as formatted string
         self.duration = format_duration(leg.duration)
 
+        #store airplane as formatted string
+        self.airplane = f"{leg.airline.value} {leg.flight_number}"
+
 class layoverInfo:
     def __init__(self, layover):
         #store layover airport as string
