@@ -25,10 +25,11 @@ def get_dates():
 
 def perform_search(start_date, end_date):
     #what happens in the search thread
-    #use a try/except to display an error message for exceptions
+    #use a try/except to display a basic error message for exceptions
     try:
         results = searchFlights(start_date, end_date)
-        gui.after(0, lambda: display_results(results))
+        sorted_results = sorted(results, key=lambda result: result[0].price)
+        gui.after(0, lambda: display_results(sorted_results))
     except Exception:
         gui.deleteResultCards()
         gui.create_message_card("error")
