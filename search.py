@@ -95,14 +95,14 @@ def consoleDemo(results):
         print(f"Returning Flight: {format_duration(return_flight.duration)}\n")
 
         for i in range(len(return_flight.legs)):
-                    segment = return_flight.legs[i]
-                    print(f"Flight: {segment.airline.value} {segment.flight_number} ({format_duration(segment.duration)})")
-                    print(f"Departure: {format_datetime(segment.departure_datetime)} from {segment.departure_airport.name}")
-                    print(f"Arrival: {format_datetime(segment.arrival_datetime)} from {segment.arrival_airport.name}\n")
-        
-                    if i < len(return_flight.legs) - 1:
-                        layover = return_flight.layovers[i]
-                        print(f"Layover: {format_duration(layover.duration)} in {layover.airport.name}\n")
+            segment = return_flight.legs[i]
+            print(f"Flight: {segment.airline.value} {segment.flight_number} ({format_duration(segment.duration)})")
+            print(f"Departure: {format_datetime(segment.departure_datetime)} from {segment.departure_airport.name}")
+            print(f"Arrival: {format_datetime(segment.arrival_datetime)} from {segment.arrival_airport.name}\n")
+
+            if i < len(return_flight.legs) - 1:
+                layover = return_flight.layovers[i]
+                print(f"Layover: {format_duration(layover.duration)} in {layover.airport.name}\n")
         
         print("-----------------------------------------------------------")
 

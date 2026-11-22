@@ -363,6 +363,7 @@ class detailsPage(ttk.Frame):
         self.controller = controller
 
         self.create_template()
+        self.fill_template()
 
     def create_template(self):
         #create a panel to serve as heading
@@ -399,10 +400,7 @@ class detailsPage(ttk.Frame):
         self.details_cost = ttk.Label(self.details_cost_panel, text="$650", style="details_cost.TLabel")
         self.details_cost.place(relx=0.5,rely=0.5, anchor="center")
 
-
-
-
-        #create panel to display cards of search results
+        #create panel to display cards of flight info
         ttk.Style().configure("details_border.TFrame", background=self.controller.COLORS["gray"])
         self.details_panel = ttk.Frame(self, style="details_border.TFrame")
         self.details_panel.pack(side="top", fill="both", expand=True)
@@ -413,7 +411,6 @@ class detailsPage(ttk.Frame):
         self.details_frame.grid_columnconfigure(0, weight=1)
         self.details_frame.grid_columnconfigure(1, weight=0)
         self.details_frame.grid_rowconfigure(0, weight=1)
-
 
         #create a scrollbar by making a scroll bar, a canvas, and a holder 
         ttk.Style().configure("details_container.TFrame", background=self.controller.COLORS["white"])
@@ -432,8 +429,87 @@ class detailsPage(ttk.Frame):
         self.details_container.bind("<Configure>", lambda e: self.details_canvas.configure(scrollregion=self.details_canvas.bbox("all")))
         self.details_canvas.bind("<Configure>", lambda e: self.details_canvas.itemconfig(self.details_window, width=e.width))
 
+        #create a button at the bottom to return back to home screen
+        self.back_panel = ttk.Frame(self, style="details_border.TFrame", padding=10)
+        self.back_panel.pack(side="bottom", fill="x")
 
-    
+        ttk.Style().configure("back.TButton", font=self.controller.FONTS["label"], 
+            background=self.controller.COLORS["campus_gold"],
+            foreground=self.controller.COLORS["white"])
+        ttk.Style().map("back.TButton",
+            background=[("active", self.controller.COLORS["old_gold"]), ("pressed", self.controller.COLORS["old_gold"])])
+        self.submit_button = ttk.Button(self.back_panel, text="BACK", style="back.TButton")
+        self.submit_button.pack(fill="both", expand=True)
+
+    def fill_template(self):
+        #clear sections
+        for section in self.sections:
+            section.destroy()
+
+        self.sections.clear()
+
+
+        #add sections for departing and return flight
+        self.add_flight_info()
+        self.add_flight_info()
+
+    def add_flight_info(self):
+        #create a panel to hold flight info
+        flight_details_panel = ttk.Frame(self.details_container)
+        flight_details_panel.pack(fill="x", pady=5)
+
+        #make a topbar to list type of flight (departing vs. arrival) and total flight time
+        ttk.Style().configure("flight_panel.TFrame", background=self.controller.COLORS["campus_gold"])
+        flight_topbar = ttk.Frame(flight_details_panel, style="flight_panel.TFrame", padding=10)
+        flight_topbar.pack(side="top", fill="x")
+
+        #add text to the topbar
+        ttk.Style().configure("flight_heading.TLabel", justify="left", font=self.controller.FONTS["header"],
+            background=self.controller.COLORS["campus_gold"],
+            foreground=self.controller.COLORS["white"])
+        flight_heading = ttk.Label(flight_topbar, text="Departing Flight (1hr 20m)", style="flight_heading.TLabel")
+        flight_heading.pack(side="left")
+
+        #create a container to hold the specific flight info
+        ttk.Style().configure("flight_container.TFrame", background=self.controller.COLORS["old_gold"])
+        flight_details_container = ttk.Frame(flight_details_panel, style="flight_container.TFrame", padding=10)
+        flight_details_container.pack(side="top", fill="both", expand=True)
+
+        #generate cards for flight info
+        ttk.Style().configure("flight_details_card.TFrame", background=self.controller.COLORS["white"])
+        ttk.Style().configure("flight_details_label.TLabel", font=self.controller.FONTS["header"],
+            background=self.controller.COLORS["white"])
+        ttk.Style().configure("flight_details_text.TLabel", font=self.controller.FONTS["regular"],
+            background=self.controller.COLORS["white"])
+        
+        for i in range(2):
+            #make a card with flight leg details
+            flight_leg_card = ttk.Frame(flight_details_container, style="flight_details_card.TFrame", padding=10)
+            flight_leg_card.pack(side="top", fill="x", pady=5)
+
+            #add the text to the flight leg details card
+            flight_leg_title = ttk.Label(flight_leg_card, text="Flight: 1hr 40min", style="flight_details_label.TLabel")
+            flight_leg_title.pack(side="top", fill="x")
+            flight_leg_airplane = ttk.Label(flight_leg_card, text="Aircraft: United Airlines 2770", style="flight_details_text.TLabel")
+            flight_leg_airplane.pack(side="top", fill="x")
+            flight_leg_departure = ttk.Label(flight_leg_card, text="Departure: Monday November 23, 2026 - 06:45PM from DSM", style="flight_details_text.TLabel")
+            flight_leg_departure.pack(side="top", fill="x")
+            flight_leg_arrival = ttk.Label(flight_leg_card, text="Return: Monday November 23, 2026 - 08:25PM from ORD", style="flight_details_text.TLabel")
+            flight_leg_arrival.pack(side="top", fill="x")
+
+            if i < 2 - 1:
+                #create a layover card in between each flight leg
+                flight_layover_card = ttk.Frame(flight_details_container, style="flight_details_card.TFrame", padding=10)
+                flight_layover_card.pack(side="top", fill="x", pady=5)
+
+                flight_layover_title = ttk.Label(flight_layover_card, text="Layover: 1hr 10min", style="flight_details_label.TLabel")
+                flight_layover_title.pack(side="top", fill="x")
+                flight_layover_airport = ttk.Label(flight_layover_card, text="Airport: ORD", style="flight_details_text.TLabel")
+                flight_layover_airport.pack(side="top", fill="x")
+            
+        #finally, add flight info card to sections list
+        self.sections.append(flight_details_panel)
+
 
 if __name__ == "__main__":
     gui = flightGUI()
