@@ -25,8 +25,8 @@ class flightGUI(tk.Tk):
     
         #fonts
         self.FONTS = {
-            "title": font.Font(family="Helvetica", size=20, weight="bold"),
-            "subtitle": font.Font(family="Helvetica", size=15),
+            "title": font.Font(family="Helvetica", size=15, weight="bold"),
+            "subtitle": font.Font(family="Helvetica", size=12),
             "header": font.Font(family="Helvetica", size=10, weight="bold"),
             "label": font.Font(family="Helvetica", size=8, weight="bold"),
             "regular": font.Font(family="Helvetica", size=8)
@@ -34,7 +34,8 @@ class flightGUI(tk.Tk):
 
         #root setup
         self.title("Personalized Flight Trips Search!")
-        self.geometry("300x450+50+50")
+        self.geometry("350x450+50+50")
+        self.minsize(300,450)
         ttk.Style().theme_use("clam")
 
         #main gui container frame setup
@@ -110,16 +111,24 @@ class searchPage(ttk.Frame):
         self.title_panel.pack(side="top")
 
         #create title and subtitle
-        ttk.Style().configure("title.TLabel", font=self.controller.FONTS["title"],
+        ttk.Style().configure("title.TLabel", font=self.controller.FONTS["title"], 
             background=self.controller.COLORS["black"],
             foreground=self.controller.COLORS["campus_gold"])
-        ttk.Style().configure("subtitle.TLabel", font=self.controller.FONTS["subtitle"],
+        ttk.Style().configure("subtitle.TLabel", font=self.controller.FONTS["subtitle"], 
             background=self.controller.COLORS["black"],
             foreground=self.controller.COLORS["old_gold"])
-        self.title = ttk.Label(self.title_panel, text="GET ME OUT OF HERE!", style="title.TLabel")
+        self.title = ttk.Label(self.title_panel, text="GET ME OUT OF HERE!",
+            style="title.TLabel", justify="center")
         self.title.grid(row=0, column=0)
-        self.subtitle = ttk.Label(self.title_panel, text="Search roundtrips between IND and DSM", style="subtitle.TLabel")
+        self.subtitle = ttk.Label(self.title_panel, text="Search roundtrips between IND and DSM",
+            style="subtitle.TLabel", justify="center")
         self.subtitle.grid(row=1, column=0)
+
+        #allow resizing for title and subtitle
+        self.search_panel.bind("<Configure>", lambda e: (
+            self.title.config(wraplength=e.width-40),
+            self.subtitle.config(wraplength=e.width-40)
+        ))
 
         #create panel to house input
         self.input_panel = ttk.Frame(self.search_panel, style="search.TFrame")
@@ -255,7 +264,7 @@ class searchPage(ttk.Frame):
         new_card.columnconfigure(2, weight=2, uniform="columns")
 
         #creates a small side panel for total cost display
-        ttk.Style().configure("cost.TFrame", background=self.controller.COLORS["campus_gold"])
+        ttk.Style().configure("cost.TFrame", background=self.controller.COLORS["campus_gold"], padding=5)
         cost_panel = ttk.Frame(new_card, style="cost.TFrame")
         cost_panel.grid(row=0, column=2, sticky="nsew")
 
@@ -263,7 +272,7 @@ class searchPage(ttk.Frame):
             background=self.controller.COLORS["campus_gold"],
             foreground=self.controller.COLORS["white"])
         cost = ttk.Label(cost_panel, text=f"{tripInfo.cost}", style="cost.TLabel")
-        cost.pack(expand=True, padx=10, pady=10)
+        cost.pack(expand=True)
 
         #creates colors and fonts for departing and return panels
         ttk.Style().configure("info.TFrame", background=self.controller.COLORS["old_gold"])
@@ -271,7 +280,6 @@ class searchPage(ttk.Frame):
             background=self.controller.COLORS["old_gold"])
         ttk.Style().configure("result_text.TLabel", font=self.controller.FONTS["regular"],
             background=self.controller.COLORS["old_gold"])
-
 
         #panel for departing flight info
         departing_panel = ttk.Frame(new_card, style="info.TFrame", padding=5)
@@ -294,6 +302,13 @@ class searchPage(ttk.Frame):
             style="result_text.TLabel")
         depart_time.pack(anchor="w")
 
+        #allow resizing of text within departing_panel
+        departing_panel.bind("<Configure>", lambda e: (
+            depart_airline.config(wraplength=e.width-15),
+            depart_order.config(wraplength=e.width-15),
+            depart_time.config(wraplength=e.width-15),
+        ))
+
         #panel for return flight info
         return_panel = ttk.Frame(new_card, style="info.TFrame", padding=5)
         return_panel.grid(row=0, column=1, sticky="nsew")
@@ -314,6 +329,13 @@ class searchPage(ttk.Frame):
             text=f"{return_flight.departing_time} to {return_flight.arrival_time} ({return_flight.total_duration})",
             style="result_text.TLabel")
         return_time.pack(anchor="w")
+
+        #allow resizing of text within departing_panel
+        return_panel.bind("<Configure>", lambda e: (
+            return_airline.config(wraplength=e.width-15),
+            return_order.config(wraplength=e.width-15),
+            return_time.config(wraplength=e.width-15),
+        ))
 
         #redirect to details page upon click
         self.make_card_clickable(new_card, lambda e: self.controller.open_details(tripInfo))
@@ -416,7 +438,7 @@ class detailsPage(ttk.Frame):
         self.details_cost_panel.grid(row=0, column=1, sticky="nsew")
 
         #add cost text
-        ttk.Style().configure("details_cost.TLabel", justify="center", font=self.controller.FONTS["subtitle"],
+        ttk.Style().configure("details_cost.TLabel", justify="center", font=self.controller.FONTS["header"],
             background=self.controller.COLORS["campus_gold"],
             foreground=self.controller.COLORS["white"])
         self.details_cost = ttk.Label(self.details_cost_panel, text="$650", style="details_cost.TLabel")
@@ -515,6 +537,12 @@ class detailsPage(ttk.Frame):
             background=self.controller.COLORS["white"])
         ttk.Style().configure("flight_details_text.TLabel", font=self.controller.FONTS["regular"],
             background=self.controller.COLORS["white"])
+
+        #allow resizing of text within flight_details_panel
+        flight_details_panel.bind("<Configure>", lambda e: (
+            flight_heading.config(wraplength=e.width),
+            flight_subheading.config(wraplength=e.width)
+        ))
         
         for i in range(len(flightInfo.legs)):
             #make a card with flight leg details
@@ -531,6 +559,18 @@ class detailsPage(ttk.Frame):
             flight_leg_arrival = ttk.Label(flight_leg_card, text=f"Arrival: {flightInfo.legs[i].times["arrival"]} from {flightInfo.legs[i].airports["arrival"]}", style="flight_details_text.TLabel")
             flight_leg_arrival.pack(side="top", fill="x")
 
+            #allow resizing of text within flight_leg_card
+            flight_leg_card.bind("<Configure>", lambda e, 
+                leg_title=flight_leg_title,
+                leg_airplane=flight_leg_airplane,
+                leg_departure=flight_leg_departure,
+                leg_arrival=flight_leg_arrival: (
+                    leg_title.config(wraplength=e.width-20),
+                    leg_airplane.config(wraplength=e.width-20),
+                    leg_departure.config(wraplength=e.width-20),
+                    leg_arrival.config(wraplength=e.width-20)
+            ))
+
             if i < len(flightInfo.legs) - 1:
                 #create a layover card in between each flight leg
                 flight_layover_card = ttk.Frame(flight_details_container, style="flight_details_card.TFrame", padding=10)
@@ -540,6 +580,14 @@ class detailsPage(ttk.Frame):
                 flight_layover_title.pack(side="top", fill="x")
                 flight_layover_airport = ttk.Label(flight_layover_card, text=f"Airport: {flightInfo.layovers[i].airport}", style="flight_details_text.TLabel")
                 flight_layover_airport.pack(side="top", fill="x")
+
+                #allow resizing of text within flight_leg_layover_card
+                flight_layover_card.bind("<Configure>", lambda e, 
+                    layover_title = flight_layover_title,
+                    layover_airport = flight_layover_airport: (
+                        layover_title.config(wraplength=e.width-20),
+                        layover_airport.config(wraplength=e.width-20)
+                ))
             
         #finally, add flight info card to sections list
         self.sections.append(flight_details_panel)
