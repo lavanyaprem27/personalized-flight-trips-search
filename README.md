@@ -64,25 +64,25 @@ pip install -r requirements.txt
 cd path\to\file
 ```
 
-2. Run the program.
+2. Run the main file of the program.
 
 ### Windows
 ```bash
-python personalized-flight-trips-search.py`
+python main.py`
 ```
 
 ### macOS/Linux
 ```bash
-python3 personalized-flight-trips-search.py`
+python3 main.py`
 ```
 
 ## Roadmap
 
 ### Minimum Viable Product *(Do)*:
 
-- [ ] User interface to select travel dates
-- [ ] View Google Flights trips matching user-selected dates and stored flight criteria
-- [ ] Sort resulting trips by total trip cost
+- [X] User interface to select travel dates
+- [X] View Google Flights trips matching user-selected dates and stored flight criteria
+- [X] Sort resulting trips by total trip cost
 
 ### Scheduled Features *(Scheduled)*:
 - [ ] Allow user to specify an acceptable range of dates/times for departing and return flight
