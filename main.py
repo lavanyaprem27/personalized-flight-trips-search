@@ -4,103 +4,99 @@ import pandas as pd
 from openpyxl.styles import Alignment, Font
 import threading
 
-#instance of GUI class
 gui = FlightGUI()
 
-#stores tripInfo objects from recent search
 found_trips = []
 
+#Typically, the commands of Tkinter buttons are initialized
+#as soon as the button is made. In this case, I chose to configure
+#the submit and export buttons on the search_page in main.py
+#because the commands use functions that depend on features
+#within other classes (submit button needs search algorithm
+#from search.py, export button uses the TripInfo objects stored
+#in main.py)
 def run():
-    #configure the submit button to run search procedure
     gui.search_page.submit_button.config(command=get_dates)
-
-    #configure the export button to run export procedure
     gui.search_page.export_button.config(command=results_to_excel)
 
-    #start the main loop
     gui.mainloop()
 
-#TODO: explain the 3 function process of processing results
+#This is the command used by the submit button to perform the
+#Google Flights search. This function originally handled everything
+#from clearing the results, using the fli library to search, and
+#updating the GUI. I realized that this caused a very similar issue
+#to something we learned in CS180 when working on Swing GUIs:
+#the GUI would freeze while the main thread worked on other methods.
+#Now, get_dates() only handles clearing the results and starting a 
+#search thread.
 def get_dates():
-    #get rid of previous flight results
     found_trips.clear()
     gui.delete_result_cards()
 
-    #create a message to indicate search
     gui.create_message_card("searching")
 
-    #get dates from DateEntry fields
     start_date = format_input(gui.search_page.start_date.get_date())
     end_date = format_input(gui.search_page.end_date.get_date())
 
-    #create a thread to search
     threading.Thread(
         target=perform_search,
         args=(start_date, end_date),
         daemon=True
     ).start()
 
+#This function is what runs within the separate thread. It relies
+#on search.py to use the fli library and gather results from Google Flights.
+#I've noticed that sometimes the fli library fails to connect,
+#so I've included a broad try/except to display an error message when this happens.
 def perform_search(start_date, end_date):
-    #what happens in the search thread
-
-    #use a try/except to display a basic error message for exceptions
     try:
-        #perform search
         results = search_flights(start_date, end_date)
-
-        #queue GUI to display the results
         gui.after(0, lambda: display_results(start_date, end_date, results))
 
     except Exception:
-        #just show a basic error message if met with an exception
         gui.delete_result_cards()
         gui.create_message_card("error")
 
-
+#This function is the queued GUI update that happens after the thread finishes.
+#The results are not naturally sorted by price, so I use a lambda to sort
+#the results (tuples of the fli class FlightResult) from lowest to highest price.
+#I then use the FlightResult instances to create my own TripInfo instances,
+#which store the most relevant info in text format. This is more convenient
+#for making the result cards, as I don't have to format the information multiple times.
 def display_results(start_date, end_date, results):
-    #queued GUI update
-
-    #delete old cards
     gui.delete_result_cards()
 
-    #display message if no results, hide export button
     if results == None:
         gui.create_message_card("no_results")
         gui.search_page.results_count.config(text="Results: 0")
         gui.search_page.export_button.grid_remove()
         return
 
-    #sort results by price
     sorted_results = sorted(results, key=lambda result: result[0].price)
 
-    #process results to display cards
     for outbound_flight, return_flight in sorted_results:
-        
-        #create a tripInfo object to store a single flight result, and store in found_trips[]
         trip = TripInfo(start_date, end_date, outbound_flight, return_flight)
         found_trips.append(trip)
 
-        #create a new result card using the tripInfo object
         gui.create_result_card(trip)
 
-    #update results count and show export button
     gui.search_page.results_count.config(text=f"Results: {len(sorted_results)}")
     gui.search_page.export_button.grid()
 
-#TODO: explain how this works
+#This function is used by the export button and creates an excel sheet
+#in the working directory with basic information from each found trip.
+#The export functionality is only available when there is at least 1 result.
+#The function uses pandas and openpyxl to build the table row-by-row from
+#each TripInfo object stored. Afterwards, all the price entrys in row A1
+#are formatted into numbers, and each column's width is set to its widest entry.
 def results_to_excel():
-    #converts results in found_trips[] into an excel file
-
-    #array that stores column names
     col_names = [
         "Total Price",
         "Outbound Airline", "Outbound Duration", "Outbound Departure Time", "Outbound Arrival Time", "Outbound Layover Airport", "Outbound Layover Duration",
         "Return Airline", "Return Duration", "Return Departure Time", "Return Arrival Time", "Return Layover Airport", "Return Layover Duration"]
     
-    #array to store individual rows
     rows = []
 
-    #iterate over tripInfo objects in found_trips[] to create rows
     for trip in found_trips:
         new_row = []
 
@@ -140,40 +136,38 @@ def results_to_excel():
         #append final row
         rows.append(new_row)
 
-    #generate table
     table = pd.DataFrame(rows, columns=col_names)
 
-    #create excel file
     with pd.ExcelWriter('IND_DSM_Roundtrip.xlsx', engine="openpyxl") as writer:
         table.to_excel(writer, sheet_name="results", index=False, startrow=1)
 
         sheet=writer.sheets["results"]
 
-        #format cost in dollars
         for cell in sheet["A"][1:]:
             cell.number_format = '$#,##0.00'
 
-        #add title row above table and format it as centered and bolded
+        #Here, I am merging the first row into a single cell to display a title.
+        #The title simply shows the start and end date of the trips.
         sheet.merge_cells("A1:M1")
         sheet["A1"] = f"{found_trips[0].start_date} - {found_trips[0].end_date} Roundtrip"
         sheet["A1"].alignment = Alignment(horizontal="center", vertical="center")
         sheet["A1"].font = Font(bold=True)
 
-        #appropriately widen the columns
+        #This loop iterates through each column in the spreadsheet.
+        #It first starts by finding out the column's letter name,
+        #which is needed to apply the new width. Then, it iterates through
+        #every filled cell (except the first one, which is a merged cell) and keeps
+        #track of the widest cell. In the end, the max width is applied
+        #to the column with an extra 2 pixels for padding.
         for column in sheet.columns:
-
-            #get the letter name accessor for the column
             column_name = column[1].column_letter
 
-            #iterate through cells in column (skipping title) and find max width needed
             relative_max_width = 0
             for cell in column[1:]:
                 if cell.value is not None:
                     relative_max_width = max(relative_max_width, len(str(cell.value)))
 
-            #update column length to max +1 padding
             sheet.column_dimensions[column_name].width = relative_max_width + 2
 
-#upon file run command
 if __name__ == "__main__":
     run()

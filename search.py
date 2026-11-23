@@ -11,43 +11,44 @@ from fli.models import (
 )
 from fli.search import SearchFlights
 
-#TODO: explain why there are so many conversions
+#All the functions below convert datetime objects into a
+#more human readable format. Both the fli library search results
+#and the DateTime entries used in the GUI to input travel dates return
+#information in the form of datetime objects, so I use these to easily
+#convert the returned info into text to display on the GUI
 
-#converts a datetime object to fli's date input format ("year-month-day")
 def format_input(date) -> str:
     return date.strftime("%Y-%m-%d")
 
-#converts a datetime object to a "##:##AM/PM" time format
 def format_time(date) -> str:
     return date.strftime("%I:%M%p")
 
-#formats a datetime object (or a string in "year-month-day" format)
-#into a "day, month date, year" format
 def format_date(date) -> str:
-    #converts string into parseable datetime object
     if isinstance(date, str):
         date = datetime.strptime(date, "%Y-%m-%d")
     return date.strftime("%A %B %d, %Y")
 
-#formats a datetime object into a
-#"day, month date, year - ##:##AM/PM" format
 def format_datetime(datetime_string: datetime) -> str:
      return datetime_string.strftime("%A %B %d, %Y - %I:%M%p")
 
-#converts minutes into a "#hr #min" format
 def format_duration(minutes: int) -> str:
     hours, mins = divmod(minutes, 60)
     return f"{hours}hr {mins}min" if hours else f"{mins}min"
 
-#TODO: explain how the search algorithm works
-
+#This search function uses the fli library to return roundtrip options
+#between the Indianapolis Airport and Des Moines Airport.
+#The structure of this function follows the procedure advised by punitarani, the
+#creator of the fli library. It starts by specifying the requested flight segments, 
+#aka outbound and return flights, to search for. Then we create a filter to narrow 
+#down the search to the top round trips of the specified flight segments
+#for a single economy seat. The fli library performs the search using
+#searchFlights().search(filters) and returns the results as tuples of the
+#class FlightResult, two for each search result representing the outbound and return flight.
 def search_flights(outbound_date, return_date):
 
-    #variables to store airports
     origin_airport = Airport.IND
     destination_airport = Airport.DSM
 
-    #specify each trip of the roundtrip as a flight segment
     flight_segments = [
         FlightSegment(
             travel_date=outbound_date,
@@ -61,7 +62,6 @@ def search_flights(outbound_date, return_date):
         ),
     ]
 
-    #Set up filter
     filters = FlightSearchFilters(
         trip_type=TripType.ROUND_TRIP,
         passenger_info=PassengerInfo(adults=1),
@@ -70,84 +70,73 @@ def search_flights(outbound_date, return_date):
         sort_by=SortBy.TOP_FLIGHTS
     )
 
-    #perform search with fli library
     search = SearchFlights()
     results = search.search(filters)
 
-    #return list of results
     return results
 
-#TODO: explain purpose of helper classes
+#The following classes are used for storing relevant information
+#provided by fli's FlightResult instances in formatted text that
+#can be easily accessed by tkGUI.py to make the result cards. 
+#I noticed that FlightResult itself stored specific information
+#on layovers and individual flights between airports as separate objects,
+#so I mirrored that with my usage of LayoverInfo and LegInfo. One thing
+#I did differently was to make TripInfo hold the outbound and return flights
+#rather than a tuple, so that I could also store general information
+#like the total cost and start/end dates searched for.
+#The outbound and inbound FlightResult objects are passed into TripInfo,
+#which handles making the nested FlightInfo, LegInfo, and LayoverInfo objects
+#by passing FlightResult's own representations of this info into their 
+#constructors. In the end, my classes have a similar heirachy to FlightResult.
 
-#stores general info about a singular roundtrip
-#and stores objects specifying outbound and return flight
 class TripInfo:
     def __init__(self, start_date, end_date, outbound_flight, return_flight):
         #store cost as formatted string
         self.cost = f"${outbound_flight.price:.2f}"
 
-        #store trip dates as formatted strings
         self.start_date = format_date(start_date)
         self.end_date = format_date(end_date)
 
-        #store flights as FlightInfo objects
         self.outbound_flight = FlightInfo(outbound_flight)
         self.return_flight = FlightInfo(return_flight)
 
-#stores general info about an outbound/return flight
-#as well as objects for flight legs and layovers
 class FlightInfo:
     def __init__(self, flight):
-        #store total duration as formatted string
         self.total_duration = format_duration(flight.duration)
 
-        #store airline as string
         self.airline = flight.legs[0].airline.value
 
-        #store times as formatted string
         self.departure_time = format_time(flight.legs[0].departure_datetime)
         self.arrival_time = format_time(flight.legs[-1].arrival_datetime)
 
-        #store airports as strings in list
         self.airports = [leg.departure_airport.name for leg in flight.legs]
         self.airports.append(flight.legs[-1].arrival_airport.name)
 
-        #store flight legs in list
         self.legs = [LegInfo(leg) for leg in flight.legs]
 
-        #store layovers in list
         self.layovers = [LayoverInfo(layover) for layover in flight.layovers]
 
-#stores info from a flight from one airport to another
 class LegInfo:
     def __init__(self, leg):
-        #store airports as dictionary of formatted strings
         self.airports = {
             "departure": leg.departure_airport.name,
             "arrival": leg.arrival_airport.name
         }
 
-        #store times as dictionary of formatted strings
         self.times = {
             "departure": format_time(leg.departure_datetime),
             "arrival": format_time(leg.arrival_datetime)
         }
 
-        #store duration as formatted string
         self.duration = format_duration(leg.duration)
 
-        #store aircraft as formatted string
         self.aircraft = f"{leg.airline.value} {leg.flight_number}"
 
-#stores info on a layover between two legs
 class LayoverInfo:
     def __init__(self, layover):
-        #store layover airport as string
         self.airport = layover.airport.name
 
-        #store layover duration as formatted string
         self.duration = format_duration(layover.duration) 
           
-#do not do anything if run as standalone
 if __name__ == "__main__":
     pass
