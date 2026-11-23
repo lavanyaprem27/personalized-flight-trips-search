@@ -8,15 +8,17 @@ Because it is my first year at Purdue University, I look forward to visiting hom
 
 ## How It Works
 
-The python script creates a `tkinter` GUI that enables the user to input a travel date for the departing and returning flight. After verifying that the entered dates are valid, the program uses the Python Library in [punitarani/fli](https://github.com/punitarani/fli) to search for trips via Google Flights and filter the results by the user-selected dates and the creator's standard flight requirements (1 adult passenger, economy class, 1 carry-on baggage, etc.). The matching results are displayed individually with basic information such as the total trip price, Airline Carrier, and flight timings.
+The python script creates a `tkinter` GUI that enables the user to input a travel date for the departing and returning flight. Once the user submits the dates, the program uses the Python Library in [punitarani/fli](https://github.com/punitarani/fli) to search for trips via Google Flights and filter the results by the user-selected dates and the creator's standard flight requirements (1 adult passenger, economy class, 1 carry-on baggage, etc.). The matching results are displayed individually with basic information such as the total trip price, Airline Carrier, and flight timings. In the case an exception occured during the search or no results were found, a relevant message is displayed instead.
+
+After the program displays at least 1 search result, the user is given options to further interact with the data. Clicking the "Export to Excel" button at the bottom of the search page will generate an excel sheet in the working directory. Clicking on an individual result will redirect the page to a detailed view of the trip plan. The user is free to exit this page and return back to the search page by clicking the "BACK" button at the bottom.
 
 ![Logic Flowchart diagram of *Get Me Out of Here!*](Project_Planning_Resources/Flowchart.png)
 
 ## Tech Stack
 
 - **Language:** Python
-- **Libraries:** `tkinter`, `tkcalendar`, [`Fli`](https://github.com/punitarani/fli)
-- **External tools:** Google Flights
+- **Libraries:** `tkinter`, `tkcalendar`, [`Fli`](https://github.com/punitarani/fli), `datetime`, `threading`, `pandas`, `openpyxl`
+- **External tools:** Google Flights, Excel
 
 ## Setup
 
@@ -55,16 +57,7 @@ python -m venv .venv
 ```bash
 pip install -r requirements.txt
 ```
-
-## Usage
-
-1. In the terminal, navigate to the directory with the downloaded project file.
-
-```bash
-cd path\to\file
-```
-
-2. Run the main file of the program.
+6. Run the main file of the program.
 
 ### Windows
 ```bash
@@ -75,6 +68,23 @@ python main.py`
 ```bash
 python3 main.py`
 ```
+
+## Usage
+
+1. Enter the travel dates in the fields labeled "Outbound Date:" and "Return Date". You can either type in the date in the MM/DD/YYYY format or by using the calendar popup. To exit the popup, first click on the calendar, then anywhere else in the window.
+
+2. Press the "SEARCH" button to submit the dates and begin the flight search. A temporary green message box with the words "Searching..." should appear.
+
+3. Occasionally, the fli library encounters an error when connecting with Google Flights and produces an exception. When this occurs, a red message box will appear. You are free to change the dates or submit again, but the best practice is to close the GUI and reopen it. If the error repeatedly occurs restarting the GUI, it is likely that fli's search methods have become outdated with Google Flights. Please submit a GitHub Issue, and I will work to fix this.
+
+4. When no results are found, a blue message box will appear with the message "No results found!". Please change the dates and resubmit to try again.
+
+5. If any results are found for the specified search, the bottom half of the page will be populated with yellow cards giving details for the outbound flight, return flight, and trip cost.
+
+6. After getting results, click the "EXPORT TO EXCEL" to generate an excel sheet in the working directory. The data in the cells will be formatted as text, so additional processing may be required to get it into a desired format.
+
+7. After getting results, click on any result card to switch to a more detailed view of the trip result information. Click the "BACK" button at the bottom of the screen to return back to the search page.
+
 
 ## Roadmap
 
@@ -87,7 +97,7 @@ python3 main.py`
 ### Scheduled Features *(Scheduled)*:
 - [ ] Allow user to specify an acceptable range of dates/times for departing and return flight
 - [ ] Option to only include flights with a layover time within a range
-- [ ] Export results to Excel using `pandas`
+- [X] Export results to Excel using `pandas`
 
 
 ### Potential Features *(Delete)*:

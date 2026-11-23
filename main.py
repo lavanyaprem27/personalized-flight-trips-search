@@ -84,7 +84,7 @@ def display_results(start_date, end_date, results):
     gui.search_page.export_button.grid()
 
 #This function is used by the export button and creates an excel sheet
-#in the working directory with basic information from each found trip.
+#in the working directory with basic information from each found trip (scheduled feature).
 #The export functionality is only available when there is at least 1 result.
 #The function uses pandas and openpyxl to build the table row-by-row from
 #each TripInfo object stored. Afterwards, all the price entrys in row A1
