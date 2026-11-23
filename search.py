@@ -11,31 +11,43 @@ from fli.models import (
 )
 from fli.search import SearchFlights
 
+#TODO: explain why there are so many conversions
+
+#converts a datetime object to fli's date input format ("year-month-day")
 def format_input(date) -> str:
     return date.strftime("%Y-%m-%d")
 
+#converts a datetime object to a "##:##AM/PM" time format
 def format_time(date) -> str:
     return date.strftime("%I:%M%p")
 
+#formats a datetime object (or a string in "year-month-day" format)
+#into a "day, month date, year" format
 def format_date(date) -> str:
+    #converts string into parseable datetime object
     if isinstance(date, str):
         date = datetime.strptime(date, "%Y-%m-%d")
     return date.strftime("%A %B %d, %Y")
 
+#formats a datetime object into a
+#"day, month date, year - ##:##AM/PM" format
 def format_datetime(datetime_string: datetime) -> str:
      return datetime_string.strftime("%A %B %d, %Y - %I:%M%p")
 
+#converts minutes into a "#hr #min" format
 def format_duration(minutes: int) -> str:
     hours, mins = divmod(minutes, 60)
     return f"{hours}hr {mins}min" if hours else f"{mins}min"
 
-def searchFlights(outbound_date, return_date):
+#TODO: explain how the search algorithm works
+
+def search_flights(outbound_date, return_date):
 
     #variables to store airports
     origin_airport = Airport.IND
     destination_airport = Airport.DSM
 
-    #flight segments
+    #specify each trip of the roundtrip as a flight segment
     flight_segments = [
         FlightSegment(
             travel_date=outbound_date,
@@ -58,58 +70,18 @@ def searchFlights(outbound_date, return_date):
         sort_by=SortBy.TOP_FLIGHTS
     )
 
-    #perform search
+    #perform search with fli library
     search = SearchFlights()
     results = search.search(filters)
-
-    consoleDemo(results)
 
     #return list of results
     return results
 
-def consoleDemo(results):
-    #exit if no results found
-    if results == None:
-        print("Sorry, no flights found!")
-        return
+#TODO: explain purpose of helper classes
 
-    print(f"{len(results)} trips found")
-
-    for outbound_flight, return_flight in results:
-        print("\n___________________________________________________________")
-
-        print(f"Departing Flight: {format_duration(outbound_flight.duration)}\n")
-
-        for i in range(len(outbound_flight.legs)):
-            segment = outbound_flight.legs[i]
-            print(f"Flight: {segment.airline.value} {segment.flight_number} ({format_duration(segment.duration)})")
-            print(f"Departure: {format_datetime(segment.departure_datetime)} from {segment.departure_airport.name}")
-            print(f"Arrival: {format_datetime(segment.arrival_datetime)} from {segment.arrival_airport.name}\n")
-
-            if i < len(outbound_flight.legs) - 1:
-                layover = outbound_flight.layovers[i]
-                print(f"Layover: {format_duration(layover.duration)} in {layover.airport.name}\n")
-        
-        print("-----------------------------------------------------------")
-        
-        print(f"Returning Flight: {format_duration(return_flight.duration)}\n")
-
-        for i in range(len(return_flight.legs)):
-            segment = return_flight.legs[i]
-            print(f"Flight: {segment.airline.value} {segment.flight_number} ({format_duration(segment.duration)})")
-            print(f"Departure: {format_datetime(segment.departure_datetime)} from {segment.departure_airport.name}")
-            print(f"Arrival: {format_datetime(segment.arrival_datetime)} from {segment.arrival_airport.name}\n")
-
-            if i < len(return_flight.legs) - 1:
-                layover = return_flight.layovers[i]
-                print(f"Layover: {format_duration(layover.duration)} in {layover.airport.name}\n")
-        
-        print("-----------------------------------------------------------")
-
-        print(f"Total Price: ${outbound_flight.price:.2f} ")
-
-#helper classes for parsing info
-class tripInfo:
+#stores general info about a singular roundtrip
+#and stores objects specifying outbound and return flight
+class TripInfo:
     def __init__(self, start_date, end_date, outbound_flight, return_flight):
         #store cost as formatted string
         self.cost = f"${outbound_flight.price:.2f}"
@@ -118,12 +90,13 @@ class tripInfo:
         self.start_date = format_date(start_date)
         self.end_date = format_date(end_date)
 
-        #store flights as flightInfo objects
-        self.outbound_flight = flightInfo(outbound_flight)
-        self.return_flight = flightInfo(return_flight)
+        #store flights as FlightInfo objects
+        self.outbound_flight = FlightInfo(outbound_flight)
+        self.return_flight = FlightInfo(return_flight)
 
-
-class flightInfo:
+#stores general info about an outbound/return flight
+#as well as objects for flight legs and layovers
+class FlightInfo:
     def __init__(self, flight):
         #store total duration as formatted string
         self.total_duration = format_duration(flight.duration)
@@ -140,12 +113,13 @@ class flightInfo:
         self.airports.append(flight.legs[-1].arrival_airport.name)
 
         #store flight legs in list
-        self.legs = [legInfo(leg) for leg in flight.legs]
+        self.legs = [LegInfo(leg) for leg in flight.legs]
 
         #store layovers in list
-        self.layovers = [layoverInfo(layover) for layover in flight.layovers]
+        self.layovers = [LayoverInfo(layover) for layover in flight.layovers]
 
-class legInfo:
+#stores info from a flight from one airport to another
+class LegInfo:
     def __init__(self, leg):
         #store airports as dictionary of formatted strings
         self.airports = {
@@ -165,7 +139,8 @@ class legInfo:
         #store aircraft as formatted string
         self.aircraft = f"{leg.airline.value} {leg.flight_number}"
 
-class layoverInfo:
+#stores info on a layover between two legs
+class LayoverInfo:
     def __init__(self, layover):
         #store layover airport as string
         self.airport = layover.airport.name
@@ -173,6 +148,6 @@ class layoverInfo:
         #store layover duration as formatted string
         self.duration = format_duration(layover.duration) 
           
-
+#do not do anything if run as standalone
 if __name__ == "__main__":
-     consoleDemo(searchFlights("2026-12-20", "2027-01-08"))
+    pass

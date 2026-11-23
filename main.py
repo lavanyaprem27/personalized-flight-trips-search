@@ -1,34 +1,37 @@
-from tkGUI import flightGUI
-from search import searchFlights, format_input, tripInfo
+from tkGUI import FlightGUI
+from search import search_flights, format_input, TripInfo
 import pandas as pd
 from openpyxl.styles import Alignment, Font
 import threading
 
-gui = flightGUI()
+#instance of GUI class
+gui = FlightGUI()
+
+#stores tripInfo objects from recent search
 found_trips = []
 
 def run():
     #configure the submit button to run search procedure
-    gui.homePage.submit_button.config(command=get_dates)
+    gui.search_page.submit_button.config(command=get_dates)
 
     #configure the export button to run export procedure
-    gui.homePage.export_button.config(command=results_to_excel)
+    gui.search_page.export_button.config(command=results_to_excel)
 
     #start the main loop
     gui.mainloop()
 
+#TODO: explain the 3 function process of processing results
 def get_dates():
     #get rid of previous flight results
     found_trips.clear()
-    gui.deleteResultCards()
+    gui.delete_result_cards()
 
     #create a message to indicate search
     gui.create_message_card("searching")
-    print("starting!")
 
     #get dates from DateEntry fields
-    start_date = format_input(gui.homePage.start_date.get_date())
-    end_date = format_input(gui.homePage.end_date.get_date())
+    start_date = format_input(gui.search_page.start_date.get_date())
+    end_date = format_input(gui.search_page.end_date.get_date())
 
     #create a thread to search
     threading.Thread(
@@ -39,17 +42,18 @@ def get_dates():
 
 def perform_search(start_date, end_date):
     #what happens in the search thread
+
     #use a try/except to display a basic error message for exceptions
     try:
         #perform search
-        results = searchFlights(start_date, end_date)
+        results = search_flights(start_date, end_date)
 
         #queue GUI to display the results
         gui.after(0, lambda: display_results(start_date, end_date, results))
 
     except Exception:
         #just show a basic error message if met with an exception
-        gui.deleteResultCards()
+        gui.delete_result_cards()
         gui.create_message_card("error")
 
 
@@ -57,13 +61,13 @@ def display_results(start_date, end_date, results):
     #queued GUI update
 
     #delete old cards
-    gui.deleteResultCards()
+    gui.delete_result_cards()
 
     #display message if no results, hide export button
     if results == None:
         gui.create_message_card("no_results")
-        gui.homePage.results_count.config(text="Results: 0")
-        gui.homePage.export_button.grid_remove()
+        gui.search_page.results_count.config(text="Results: 0")
+        gui.search_page.export_button.grid_remove()
         return
 
     #sort results by price
@@ -71,24 +75,29 @@ def display_results(start_date, end_date, results):
 
     #process results to display cards
     for outbound_flight, return_flight in sorted_results:
+        
         #create a tripInfo object to store a single flight result, and store in found_trips[]
-        trip = tripInfo(start_date, end_date, outbound_flight, return_flight)
+        trip = TripInfo(start_date, end_date, outbound_flight, return_flight)
         found_trips.append(trip)
 
         #create a new result card using the tripInfo object
         gui.create_result_card(trip)
 
     #update results count and show export button
-    gui.homePage.results_count.config(text=f"Results: {len(sorted_results)}")
-    gui.homePage.export_button.grid()
+    gui.search_page.results_count.config(text=f"Results: {len(sorted_results)}")
+    gui.search_page.export_button.grid()
 
+#TODO: explain how this works
 def results_to_excel():
+    #converts results in found_trips[] into an excel file
+
     #array that stores column names
     col_names = [
         "Total Price",
         "Outbound Airline", "Outbound Duration", "Outbound Departure Time", "Outbound Arrival Time", "Outbound Layover Airport", "Outbound Layover Duration",
         "Return Airline", "Return Duration", "Return Departure Time", "Return Arrival Time", "Return Layover Airport", "Return Layover Duration"]
-    #create an array to store individual rows
+    
+    #array to store individual rows
     rows = []
 
     #iterate over tripInfo objects in found_trips[] to create rows
@@ -152,6 +161,7 @@ def results_to_excel():
 
         #appropriately widen the columns
         for column in sheet.columns:
+
             #get the letter name accessor for the column
             column_name = column[1].column_letter
 
@@ -164,6 +174,6 @@ def results_to_excel():
             #update column length to max +1 padding
             sheet.column_dimensions[column_name].width = relative_max_width + 2
 
-
+#upon file run command
 if __name__ == "__main__":
     run()
