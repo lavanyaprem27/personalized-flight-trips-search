@@ -174,7 +174,7 @@ class SearchPage(ttk.Frame):
         #wraparound limits are dynamically adjusted to be proportional
         #to the width of the search panel. I include very similar 
         #bindings to other elements such as the text within
-        #results cards, the heading on the details page, 
+        #results and message cards, the heading on the details page, 
         #and the text on the results page. I'm not going
         #to clarify them because they operate very similarly.
         self.search_panel.bind("<Configure>", lambda e: (
@@ -472,8 +472,10 @@ class SearchPage(ttk.Frame):
         new_card = ttk.Frame(self.results_container, style="empty.TFrame", padding=10)
         new_card.pack(fill="x", pady=5)
 
-        label = ttk.Label(new_card, text="No results found!", style="normal_text.TLabel")
+        label = ttk.Label(new_card, text="No results found!", style="normal_text.TLabel", justify="center")
         label.pack(expand="true")
+
+        new_card.bind("<Configure>", lambda e: label.config(wraplength=(e.width-20)))
 
         return new_card
 
@@ -486,8 +488,10 @@ class SearchPage(ttk.Frame):
         new_card = ttk.Frame(self.results_container, style="empty.TFrame", padding=10)
         new_card.pack(fill="x", pady=5)
 
-        label = ttk.Label(new_card, text="Searching...", style="normal_text.TLabel")
+        label = ttk.Label(new_card, text="Searching...", style="normal_text.TLabel", justify="center")
         label.pack(expand="true")
+
+        new_card.bind("<Configure>", lambda e: label.config(wraplength=(e.width-20)))
 
         return new_card
 
@@ -500,8 +504,10 @@ class SearchPage(ttk.Frame):
         new_card = ttk.Frame(self.results_container, style="error.TFrame", padding=10)
         new_card.pack(fill="x", pady=5)
 
-        label = ttk.Label(new_card, text="Sorry, we encountered an error. Please try again later!", style="normal_text.TLabel")
+        label = ttk.Label(new_card, text="Sorry, we encountered an error. Please try again later!", style="normal_text.TLabel", justify="center")
         label.pack(expand="true")
+
+        new_card.bind("<Configure>", lambda e: label.config(wraplength=(e.width-20)))
 
         return new_card
 
