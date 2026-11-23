@@ -70,9 +70,9 @@ def display_results(start_date, end_date, results):
     sorted_results = sorted(results, key=lambda result: result[0].price)
 
     #process results to display cards
-    for departing_flight, return_flight in sorted_results:
+    for outbound_flight, return_flight in sorted_results:
         #create a tripInfo object to store a single flight result, and store in found_trips[]
-        trip = tripInfo(start_date, end_date, departing_flight, return_flight)
+        trip = tripInfo(start_date, end_date, outbound_flight, return_flight)
         found_trips.append(trip)
 
         #create a new result card using the tripInfo object
@@ -101,17 +101,17 @@ def results_to_excel():
         #outbound info
 
         #airline
-        new_row.append(trip.departing_flight.airline)
+        new_row.append(trip.outbound_flight.airline)
         #duration
-        new_row.append(trip.departing_flight.total_duration)
+        new_row.append(trip.outbound_flight.total_duration)
         #departure time
-        new_row.append(trip.departing_flight.departing_time)
+        new_row.append(trip.outbound_flight.departure_time)
         #arrival time
-        new_row.append(trip.departing_flight.arrival_time)
+        new_row.append(trip.outbound_flight.arrival_time)
         #layover airport
-        new_row.append(trip.departing_flight.layovers[0].airport)
+        new_row.append(trip.outbound_flight.layovers[0].airport)
         #layover duration
-        new_row.append(trip.departing_flight.layovers[0].duration)
+        new_row.append(trip.outbound_flight.layovers[0].duration)
 
         #return info
 
@@ -120,7 +120,7 @@ def results_to_excel():
         #duration
         new_row.append(trip.return_flight.total_duration)
         #departure time
-        new_row.append(trip.return_flight.departing_time)
+        new_row.append(trip.return_flight.departure_time)
         #arrival time
         new_row.append(trip.return_flight.arrival_time)
         #layover airport

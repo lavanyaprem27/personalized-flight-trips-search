@@ -29,7 +29,7 @@ def format_duration(minutes: int) -> str:
     hours, mins = divmod(minutes, 60)
     return f"{hours}hr {mins}min" if hours else f"{mins}min"
 
-def searchFlights(departing_date, return_date):
+def searchFlights(outbound_date, return_date):
 
     #variables to store airports
     origin_airport = Airport.IND
@@ -38,7 +38,7 @@ def searchFlights(departing_date, return_date):
     #flight segments
     flight_segments = [
         FlightSegment(
-            travel_date=departing_date,
+            travel_date=outbound_date,
             departure_airport=[[origin_airport, 0]],
             arrival_airport=[[destination_airport, 0]]
         ), 
@@ -75,19 +75,19 @@ def consoleDemo(results):
 
     print(f"{len(results)} trips found")
 
-    for departing_flight, return_flight in results:
+    for outbound_flight, return_flight in results:
         print("\n___________________________________________________________")
 
-        print(f"Departing Flight: {format_duration(departing_flight.duration)}\n")
+        print(f"Departing Flight: {format_duration(outbound_flight.duration)}\n")
 
-        for i in range(len(departing_flight.legs)):
-            segment = departing_flight.legs[i]
+        for i in range(len(outbound_flight.legs)):
+            segment = outbound_flight.legs[i]
             print(f"Flight: {segment.airline.value} {segment.flight_number} ({format_duration(segment.duration)})")
             print(f"Departure: {format_datetime(segment.departure_datetime)} from {segment.departure_airport.name}")
             print(f"Arrival: {format_datetime(segment.arrival_datetime)} from {segment.arrival_airport.name}\n")
 
-            if i < len(departing_flight.legs) - 1:
-                layover = departing_flight.layovers[i]
+            if i < len(outbound_flight.legs) - 1:
+                layover = outbound_flight.layovers[i]
                 print(f"Layover: {format_duration(layover.duration)} in {layover.airport.name}\n")
         
         print("-----------------------------------------------------------")
@@ -106,20 +106,20 @@ def consoleDemo(results):
         
         print("-----------------------------------------------------------")
 
-        print(f"Total Price: ${departing_flight.price:.2f} ")
+        print(f"Total Price: ${outbound_flight.price:.2f} ")
 
 #helper classes for parsing info
 class tripInfo:
-    def __init__(self, start_date, end_date, departing_flight, return_flight):
+    def __init__(self, start_date, end_date, outbound_flight, return_flight):
         #store cost as formatted string
-        self.cost = f"${departing_flight.price:.2f}"
+        self.cost = f"${outbound_flight.price:.2f}"
 
         #store trip dates as formatted strings
         self.start_date = format_date(start_date)
         self.end_date = format_date(end_date)
 
         #store flights as flightInfo objects
-        self.departing_flight = flightInfo(departing_flight)
+        self.outbound_flight = flightInfo(outbound_flight)
         self.return_flight = flightInfo(return_flight)
 
 
@@ -132,7 +132,7 @@ class flightInfo:
         self.airline = flight.legs[0].airline.value
 
         #store times as formatted string
-        self.departing_time = format_time(flight.legs[0].departure_datetime)
+        self.departure_time = format_time(flight.legs[0].departure_datetime)
         self.arrival_time = format_time(flight.legs[-1].arrival_datetime)
 
         #store airports as strings in list
@@ -149,13 +149,13 @@ class legInfo:
     def __init__(self, leg):
         #store airports as dictionary of formatted strings
         self.airports = {
-            "departing": leg.departure_airport.name,
+            "departure": leg.departure_airport.name,
             "arrival": leg.arrival_airport.name
         }
 
         #store times as dictionary of formatted strings
         self.times = {
-            "departing": format_time(leg.departure_datetime),
+            "departure": format_time(leg.departure_datetime),
             "arrival": format_time(leg.arrival_datetime)
         }
 

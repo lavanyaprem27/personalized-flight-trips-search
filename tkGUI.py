@@ -139,10 +139,10 @@ class searchPage(ttk.Frame):
             background=self.controller.COLORS["black"],
             foreground=self.controller.COLORS["white"])
 
-        start_date_label = ttk.Label(self.input_panel, text="Departing Date:", style="search_label.TLabel")
+        start_date_label = ttk.Label(self.input_panel, text="Outbound Date:", style="search_label.TLabel")
         start_date_label.grid(row=0, column = 0, padx=5, pady=5)
 
-        end_date_label = ttk.Label(self.input_panel, text="Returning Date:", style="search_label.TLabel")
+        end_date_label = ttk.Label(self.input_panel, text="Return Date:", style="search_label.TLabel")
         end_date_label.grid(row=0, column = 1, padx=5, pady=5)
         
         #create start date and end date selectors
@@ -274,8 +274,8 @@ class searchPage(ttk.Frame):
         self.results_canvas.bind("<Configure>", lambda e: self.results_canvas.itemconfig(self.results_window, width=e.width))
 
     def create_result_card(self, tripInfo):
-        #store departing and return flight info conveniently
-        departing_flight = tripInfo.departing_flight
+        #store outbound and return flight info conveniently
+        outbound_flight = tripInfo.outbound_flight
         return_flight = tripInfo.return_flight
 
         #makes a card to display a possible flight 
@@ -297,46 +297,46 @@ class searchPage(ttk.Frame):
         cost = ttk.Label(cost_panel, text=f"{tripInfo.cost}", style="cost.TLabel")
         cost.pack(expand=True)
 
-        #creates colors and fonts for departing and return panels
+        #creates colors and fonts for outbound and return panels
         ttk.Style().configure("info.TFrame", background=self.controller.COLORS["old_gold"])
         ttk.Style().configure("result_label.TLabel", font=self.controller.FONTS["label"],
             background=self.controller.COLORS["old_gold"])
         ttk.Style().configure("result_text.TLabel", font=self.controller.FONTS["regular"],
             background=self.controller.COLORS["old_gold"])
 
-        #panel for departing flight info
-        departing_panel = ttk.Frame(new_card, style="info.TFrame", padding=5)
-        departing_panel.grid(row=0, column=0, sticky="nsew")
+        #panel for outbound flight info
+        outbound_panel = ttk.Frame(new_card, style="info.TFrame", padding=5)
+        outbound_panel.grid(row=0, column=0, sticky="nsew")
 
-        depart_airline = ttk.Label(departing_panel, text=f"Departing Flight: {departing_flight.airline}", style="result_label.TLabel")
-        depart_airline.pack(anchor="w")
+        outbound_airline = ttk.Label(outbound_panel, text=f"Outbound Flight: {outbound_flight.airline}", style="result_label.TLabel")
+        outbound_airline.pack(anchor="w")
 
-        depart_string = ""
-        for i in range(len(departing_flight.airports)):
+        outbound_string = ""
+        for i in range(len(outbound_flight.airports)):
             if (i != 0):
-                depart_string += "→"
-            depart_string += f"{departing_flight.airports[i]}"
+                outbound_string += "→"
+            outbound_string += f"{outbound_flight.airports[i]}"
         
-        depart_order = ttk.Label(departing_panel, text=depart_string, style="result_text.TLabel")
-        depart_order.pack(anchor="w")
+        outbound_order = ttk.Label(outbound_panel, text=outbound_string, style="result_text.TLabel")
+        outbound_order.pack(anchor="w")
 
-        depart_time = ttk.Label(departing_panel, 
-            text=f"{departing_flight.departing_time} to {departing_flight.arrival_time} ({departing_flight.total_duration})",
+        outbound_time = ttk.Label(outbound_panel, 
+            text=f"{outbound_flight.departure_time} to {outbound_flight.arrival_time} ({outbound_flight.total_duration})",
             style="result_text.TLabel")
-        depart_time.pack(anchor="w")
+        outbound_time.pack(anchor="w")
 
-        #allow resizing of text within departing_panel
-        departing_panel.bind("<Configure>", lambda e: (
-            depart_airline.config(wraplength=e.width-15),
-            depart_order.config(wraplength=e.width-15),
-            depart_time.config(wraplength=e.width-15),
+        #allow resizing of text within outbound_panel
+        outbound_panel.bind("<Configure>", lambda e: (
+            outbound_airline.config(wraplength=e.width-15),
+            outbound_order.config(wraplength=e.width-15),
+            outbound_time.config(wraplength=e.width-15),
         ))
 
         #panel for return flight info
         return_panel = ttk.Frame(new_card, style="info.TFrame", padding=5)
         return_panel.grid(row=0, column=1, sticky="nsew")
 
-        return_airline = ttk.Label(return_panel, text=f"Returning Flight: {return_flight.airline}", style="result_label.TLabel")
+        return_airline = ttk.Label(return_panel, text=f"Return Flight: {return_flight.airline}", style="result_label.TLabel")
         return_airline.pack(anchor="w")
 
         return_string = ""
@@ -349,11 +349,11 @@ class searchPage(ttk.Frame):
         return_order.pack(anchor="w")
 
         return_time = ttk.Label(return_panel, 
-            text=f"{return_flight.departing_time} to {return_flight.arrival_time} ({return_flight.total_duration})",
+            text=f"{return_flight.departure_time} to {return_flight.arrival_time} ({return_flight.total_duration})",
             style="result_text.TLabel")
         return_time.pack(anchor="w")
 
-        #allow resizing of text within departing_panel
+        #allow resizing of text within outbound_panel
         return_panel.bind("<Configure>", lambda e: (
             return_airline.config(wraplength=e.width-15),
             return_order.config(wraplength=e.width-15),
@@ -523,16 +523,16 @@ class detailsPage(ttk.Frame):
         self.details_heading.config(text=f"{tripInfo.start_date} - {tripInfo.end_date}")
         self.details_cost.config(text=f"{tripInfo.cost}")
 
-        #add sections for departing and return flight
-        self.add_flight_info(tripInfo.departing_flight, tripInfo.start_date)
-        self.add_flight_info(tripInfo.return_flight, tripInfo.end_date)
+        #add sections for outbound and return flight
+        self.add_flight_info(tripInfo.outbound_flight, tripInfo.start_date, "Outbound Flight")
+        self.add_flight_info(tripInfo.return_flight, tripInfo.end_date, "Return Flight")
 
-    def add_flight_info(self, flightInfo, date):
+    def add_flight_info(self, flightInfo, date, label):
         #create a panel to hold flight info
         flight_details_panel = ttk.Frame(self.details_container)
         flight_details_panel.pack(fill="x", pady=5)
 
-        #make a topbar to list type of flight (departing vs. arrival), total flight time, and date
+        #make a topbar to list type of flight (departure vs. arrival), total flight time, and date
         ttk.Style().configure("flight_panel.TFrame", background=self.controller.COLORS["campus_gold"])
         flight_topbar = ttk.Frame(flight_details_panel, style="flight_panel.TFrame", padding=10)
         flight_topbar.pack(side="top", fill="x")
@@ -544,7 +544,7 @@ class detailsPage(ttk.Frame):
         ttk.Style().configure("flight_subheading.TLabel", font=self.controller.FONTS["label"],
             background=self.controller.COLORS["campus_gold"],
             foreground=self.controller.COLORS["white"])
-        flight_heading = ttk.Label(flight_topbar, text=f"Departing Flight ({flightInfo.total_duration})", style="flight_heading.TLabel")
+        flight_heading = ttk.Label(flight_topbar, text=f"{label} ({flightInfo.total_duration})", style="flight_heading.TLabel")
         flight_heading.pack(side="top")
         flight_subheading = ttk.Label(flight_topbar, text=f"{date}", style="flight_subheading.TLabel")
         flight_subheading.pack(side="top")
@@ -577,7 +577,7 @@ class detailsPage(ttk.Frame):
             flight_leg_title.pack(side="top", fill="x")
             flight_leg_airplane = ttk.Label(flight_leg_card, text=f"Aircraft: {flightInfo.legs[i].aircraft}", style="flight_details_text.TLabel")
             flight_leg_airplane.pack(side="top", fill="x")
-            flight_leg_departure = ttk.Label(flight_leg_card, text=f"Departure: {flightInfo.legs[i].times["departing"]} from {flightInfo.legs[i].airports["departing"]}", style="flight_details_text.TLabel")
+            flight_leg_departure = ttk.Label(flight_leg_card, text=f"Departure: {flightInfo.legs[i].times["departure"]} from {flightInfo.legs[i].airports["departure"]}", style="flight_details_text.TLabel")
             flight_leg_departure.pack(side="top", fill="x")
             flight_leg_arrival = ttk.Label(flight_leg_card, text=f"Arrival: {flightInfo.legs[i].times["arrival"]} from {flightInfo.legs[i].airports["arrival"]}", style="flight_details_text.TLabel")
             flight_leg_arrival.pack(side="top", fill="x")
