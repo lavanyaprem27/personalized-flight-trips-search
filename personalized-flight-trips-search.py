@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkcalendar import DateEntry
 from datetime import datetime, date, timedelta
 
 from fli.models import (
