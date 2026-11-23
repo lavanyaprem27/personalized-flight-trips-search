@@ -2,7 +2,9 @@
 
 This small Python program allows you to search for round trips between the Indianapolis International Airport (IND) and the Des Moines International Airport (DSM) on specific travel dates. 
 
-![Image of app starting screen](demo_images/starting_screen.png)
+<p align="center">
+  <img src="demo_images/starting_screen.png" alt="Image of app starting screen" width="40%">
+</p>
 
 ## The Problem
 
@@ -75,23 +77,33 @@ python3 main.py`
 
 1. Enter the travel dates in the fields labeled "Outbound Date:" and "Return Date". You can either type in the date in the MM/DD/YYYY format or by using the calendar popup. To exit the popup, first click on the calendar, then anywhere else in the window.
 
-![Image of calendar popup](demo_images/calendar_input.png)
+<p align="center">
+  <img src="demo_images/calendar_input.png" alt="Image of calendar popup" width="40%">
+</p>
 
 2. Press the "SEARCH" button to submit the dates and begin the flight search. A temporary green message box with the words "Searching..." should appear.
 
-![Image of app's searching message](demo_images/searching_message.png)
+<p align="center">
+  <img src="demo_images/searching_message.png" alt="Image of app's searching message" width="40%">
+</p>
 
 3. Occasionally, the fli library encounters an error when connecting with Google Flights and produces an exception. When this occurs, a red message box will appear. You are free to change the dates or submit again, but the best practice is to close the GUI and reopen it. If the error repeatedly occurs restarting the GUI, it is likely that fli's search methods have become outdated with Google Flights. Please submit a GitHub Issue, and I will work to fix this.
 
-![Image of app's error message](demo_images/error_message.png)
+<p align="center">
+  <img src="demo_images/error_message.png" alt="Image of app's error message" width="40%">
+</p>
 
 4. When no results are found, a blue message box will appear with the message "No results found!". Please change the dates and resubmit to try again.
 
-![Image of no results found message](demo_images/no_results.png)
+<p align="center">
+  <img src="demo_images/no_results.png" alt="Image of no results found message" width="40%">
+</p>
 
 5. If any results are found for the specified search, the bottom half of the page will be populated with yellow cards giving details for the outbound flight, return flight, and trip cost.
 
-![Image of search results onscreen](demo_images/results_displayed.png)
+<p align="center">
+  <img src="demo_images/results_displayed.png" alt="Image of search results onscreen" width="40%">
+</p>
 
 6. After getting results, click the "EXPORT TO EXCEL" to generate an excel sheet in the working directory. The data in the cells will be formatted as text, so additional processing may be required to get it into a desired format.
 
@@ -99,7 +111,9 @@ python3 main.py`
 
 7. After getting results, click on any result card to switch to a more detailed view of the trip result information. Click the "BACK" button at the bottom of the screen to return back to the search page.
 
-![Image of flight details page](demo_images/details_page.png)
+<p align="center">
+  <img src="demo_images/details_page.png" alt="Image of flight details page" width="40%">
+</p>
 
 ## Roadmap
 
