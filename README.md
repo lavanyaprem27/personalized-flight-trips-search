@@ -39,15 +39,15 @@ cd your\local\path\personalized-flight-trips-search
 ```bash
 #macOS/Linux
 python3 -m venv .venv
-source venv/bin/activate
+source .venv/bin/activate
 
 #Windows Command Prompt
 python -m venv .venv
-venv\Scripts\activate.bat
+.venv\Scripts\activate.bat
 
 #Windows PowerShell
 python -m venv .venv
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
 5. Install the dependencies associated with the file
