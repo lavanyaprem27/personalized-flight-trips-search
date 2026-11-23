@@ -220,8 +220,32 @@ class searchPage(ttk.Frame):
                 self.start_date.set_date(self.end_date.get_date())
 
     def create_results_panel(self):
-        #create panel to display cards of search results
+        #create a panel at the bottom to show total results and export button
         ttk.Style().configure("results_border.TFrame", background=self.controller.COLORS["gray"])
+        self.export_panel = ttk.Frame(self, style="results_border.TFrame", padding=10)
+        self.export_panel.pack(side="bottom", fill="x")
+        self.export_panel.columnconfigure(0, weight=3, uniform="columns")
+        self.export_panel.columnconfigure(1, weight=2, uniform="columns")
+
+        #create text to show total results
+        ttk.Style().configure("results_num.TLabel", justify="left", font=self.controller.FONTS["header"],
+            background=self.controller.COLORS["gray"],
+            foreground=self.controller.COLORS["white"])
+        self.results_count = ttk.Label(self.export_panel, text="Results: 0", style="results_num.TLabel")
+        self.results_count.grid(row=0, column=0, sticky="nsew")
+        self.export_panel.bind("<Configure>", lambda e: self.results_count.config(wraplength=(e.width/2)))
+
+        #create the button to export to Excel, hide on start
+        ttk.Style().configure("export.TButton", font=self.controller.FONTS["label"], 
+            background=self.controller.COLORS["campus_gold"],
+            foreground=self.controller.COLORS["white"])
+        ttk.Style().map("export.TButton",
+            background=[("active", self.controller.COLORS["old_gold"]),("pressed", self.controller.COLORS["old_gold"])])
+        self.export_button = ttk.Button(self.export_panel, text="EXPORT TO EXCEL", style="back.TButton", cursor="hand2")
+        self.export_button.grid(row=0, column=1, sticky="nsew")
+        self.export_button.grid_remove()
+        
+        #create panel to display cards of search results
         self.results_panel = ttk.Frame(self, style="results_border.TFrame")
         self.results_panel.pack(fill="both", expand=True)
 
@@ -231,7 +255,6 @@ class searchPage(ttk.Frame):
         self.results_frame.grid_columnconfigure(0, weight=1)
         self.results_frame.grid_columnconfigure(1, weight=0)
         self.results_frame.grid_rowconfigure(0, weight=1)
-
 
         #create a scrollbar by making a scroll bar, a canvas, and a holder 
         ttk.Style().configure("results_container.TFrame", background=self.controller.COLORS["white"])

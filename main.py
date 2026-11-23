@@ -54,9 +54,11 @@ def display_results(start_date, end_date, results):
     #delete old cards
     gui.deleteResultCards()
 
-    #display message if no results
+    #display message if no results, hide export button
     if results == None:
         gui.create_message_card("no_results")
+        gui.homePage.results_count.config(text="Results: 0")
+        gui.homePage.export_button.grid_remove()
         return
 
     #sort results by price
@@ -70,6 +72,11 @@ def display_results(start_date, end_date, results):
 
         #create a new result card using the tripInfo object
         gui.create_result_card(trip)
+
+    #update results count and show export button
+    gui.homePage.results_count.config(text=f"Results: {len(sorted_results)}")
+    gui.homePage.export_button.grid()
+
 
 
 if __name__ == "__main__":
