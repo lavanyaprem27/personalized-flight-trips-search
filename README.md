@@ -65,12 +65,12 @@ pip install -r requirements.txt
 
 ### Windows
 ```bash
-python main.py`
+python main.py
 ```
 
 ### macOS/Linux
 ```bash
-python3 main.py`
+python3 main.py
 ```
 
 ## Usage
