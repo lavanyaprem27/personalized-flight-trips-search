@@ -28,6 +28,13 @@ After the program displays at least 1 search result, the user is given options t
 
 1. If it isn't already, install Python on your system. Releases can be found on the [Python Downloads Page](https://www.python.org/downloads/).
 
+> [!NOTE]
+> If you use Ubuntu or Debian-based distributions, you may need to install `venv` separately before proceeding.
+> ```bash
+>sudo apt update
+>sudo apt install python3-venv
+>```
+
 2. Download the code in the repository either through GitHub as a ZIP file or by using `git clone` in the command line (make sure you have git installed for this method!).
 
 ```bash
