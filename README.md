@@ -18,6 +18,12 @@ After the program displays at least 1 search result, the user is given options t
 
 ![Logic Flowchart diagram of *Get Me Out of Here!*](Project_Planning_Resources/Flowchart.png)
 
+## Demo
+
+Click the thumbnail below to see a video demo of the app ⬇️
+
+[![YouTube video showing a demo of the app](https://img.youtube.com/vi/tWUY0pGviDI/0.jpg)](https://www.youtube.com/watch?v=tWUY0pGviDI)
+
 ## Tech Stack
 
 - **Language:** Python
