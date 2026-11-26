@@ -63,6 +63,12 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
+> [!NOTE]
+> Windows PowerShell by default blocks the execution of .ps1 scripts for security. If you have not set the execution policy previously, run the below command before attempting to activate the virtual environment to bypass blocking for the current session.
+> ```bash
+>Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
+>```
+
 5. Install the dependencies associated with the file
 
 ```bash
